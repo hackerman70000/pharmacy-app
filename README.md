@@ -2,154 +2,146 @@
 
 This project is a pharmacy application that includes user account management, product browsing, a shopping cart, and email notifications. It is designed to run on Docker and PostgreSQL with a Python backend built using Flask.
 
----
+## Development
 
-## **Setup**
+### Setup
 
-### **1. Virtual Environment Setup**
+Follow these steps to set up the project locally:
 
-For managing Python dependencies, initialize and activate a virtual environment.
+1. **Clone the Repository**
 
-#### **Linux/macOS**
+   Clone the project repository and navigate to the backend directory:
 
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-#### **Windows**
-
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
-
-### **2. Install Required Dependencies**
-
-Once the virtual environment is activated, install the necessary Python packages:
-
-```bash
-cd backend
-pip install -r requirements.txt
-```
-
----
-
-## **3. Database Setup**
-
-### **Install PostgreSQL**
-
-Make sure PostgreSQL is installed and running on your system.
-
-#### **Linux/macOS (Using Homebrew)**
-
-```bash
-brew install postgresql
-brew services start postgresql
-```
-
-#### **Windows**
-
-Download PostgreSQL from the [official website](https://www.postgresql.org/download/) and follow the installation instructions.
-
-### **Create a Database**
-
-Access the PostgreSQL console:
-
-```bash
-psql postgres
-```
-
-Create the database for the project:
-
-```sql
-CREATE DATABASE pharmacy_db;
-```
-
-Access the database console:
-
-```bash
-psql pharmacy_db
-```
-
-To stop the PostgreSQL service (macOS):
-
-```
-ps aux | grep postgres
-brew services stop postgresql
-```
-
----
-
-## **4. Flask Migrations**
-
-Prepare the database schema by using Flask-Migrate:
-
-1. Initialize migrations:
    ```bash
-   flask db init
+   git clone https://github.com/hackerman70000/pharmacy-app.git
+   cd pharmacy-app/backend
    ```
-2. Create the initial migration:
+
+2. **Create and Activate Virtual Environment**
+
+   For macOS/Linux:
+
    ```bash
-   flask db migrate -m "Initial migration"
+   python -m venv venv
+   source venv/bin/activate
    ```
-3. Apply the migration:
+
+   For Windows:
+
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate
+   ```
+
+3. **Install Dependencies**
+
+   Install the required Python packages:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set Up Environment Variables**
+
+   Create a `.env` file in the `backend` directory:
+
+   ```bash
+   touch .env
+   ```
+
+   Add the following content to your `.env` file:
+
+   ```bash
+   DATABASE_URL=postgresql://yourusername@localhost/pharmacy_db
+   SECRET_KEY=your-secret-key-here
+   ```
+
+5. **Create the Database**
+
+   Use the `createdb` command to create the PostgreSQL database:
+
+   ```bash
+   createdb pharmacy_db
+   ```
+
+6. **Apply Migrations**
+
+   Run the following command to apply existing database migrations:
+
    ```bash
    flask db upgrade
    ```
 
----
+7. **Run the Development Server**
 
-## **5. Run the Application Locally**
+   Start the Flask development server:
 
-To run the app locally (outside of Docker):
-
-1. Activate the virtual environment.
-2. Run the Flask app:
    ```bash
    flask run
    ```
 
-The application will be available at `http://127.0.0.1:5000`.
-
 ---
 
-## **6. Docker Installation**
+### Development Workflow
 
-### **Install Docker**
-
-Download and install Docker Desktop from the [official Docker website](https://www.docker.com/products/docker-desktop).
-
-Check if Docker is installed:
+1. Pull latest changes:
 
 ```bash
-docker --version
+git pull origin main
+```
+
+2. Update dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+3. Apply migrations:
+
+```bash
+flask db upgrade
+```
+
+4. Create new branch for feature:
+
+```bash
+git checkout -b feature/your-feature-name
+```
+
+5. Before committing:
+
+Run these commands to ensure code quality:
+
+```bash
+# Format code with ruff
+ruff format .
 ```
 
 ---
 
-## **7. Run the App in Docker**
+### Common Issues and Solutions
 
-Build and run the application using Docker Compose:
+1. Database connection issues:
 
-```bash
-docker-compose up --build
-```
-
-This command will:
-
-- Build the backend and frontend containers.
-- Start the PostgreSQL container.
-- Run the application.
-
----
-
-## **Checking Database Connection**
-
-To verify PostgreSQL is running:
+Check if PostgreSQL is running:
 
 ```bash
-psql postgres
+ps aux | grep postgres
 ```
 
-You can use the `pharmacy_db` database created earlier for the app.
+Restart PostgreSQL (macOS):
+
+```bash
+brew services restart postgresql
+```
+
+2. Migration issues:
+
+To reset migrations:
+
+```bash
+rm -rf migrations/
+flask db init
+flask db migrate -m "Reset migrations"
+flask db upgrade
+```

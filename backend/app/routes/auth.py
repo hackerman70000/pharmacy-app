@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 
 import jwt
@@ -22,7 +22,9 @@ def token_required(f):
                 token = token[7:]
             data = jwt.decode(token, "your-secret-key", algorithms=["HS256"])
             current_user = User.query.get(data["user_id"])
-        except:
+        except jwt.ExpiredSignatureError:
+            return jsonify({"message": "Token has expired!"}), 401
+        except jwt.InvalidTokenError:
             return jsonify({"message": "Token is invalid!"}), 401
 
         return f(current_user, *args, **kwargs)
@@ -67,7 +69,7 @@ def login():
         return jsonify({"message": "Invalid username or password"}), 401
 
     token = jwt.encode(
-        {"user_id": user.id, "exp": datetime.utcnow() + timedelta(hours=24)},
+        {"user_id": user.id, "exp": datetime.now(timezone.utc) + timedelta(hours=24)},
         "your-secret-key",
         algorithm="HS256",
     )
@@ -80,7 +82,7 @@ def login():
     )
 
 
-@auth_bp.route("/me", methods=["GET"])
+@auth_bp.route("/profile", methods=["GET"])
 @token_required
 def get_current_user(current_user):
     return jsonify(

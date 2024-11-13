@@ -119,6 +119,28 @@ ruff format .
 
 ---
 
+### Database Management
+
+#### Reset Database
+
+To completely reset the database and its data:
+
+```bash
+flask db downgrade base  # Go back to empty state
+flask db upgrade        # Recreate all tables
+flask seed products     # Reseed with example data
+```
+
+#### CLI Commands
+
+Available custom CLI commands:
+
+```bash
+flask seed products     # Add example pharmacy products to the database
+```
+
+---
+
 ### Common Issues and Solutions
 
 1. Database connection issues:

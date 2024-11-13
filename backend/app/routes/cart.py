@@ -34,8 +34,6 @@ def add_to_cart(current_user):
     if not all(k in data for k in ["product_id", "quantity"]):
         return jsonify({"message": "Missing required fields"}), 400
 
-    product = Product.query.get_or_404(data["product_id"])
-
     cart_item = Cart.query.filter_by(
         user_id=current_user.id, product_id=data["product_id"]
     ).first()

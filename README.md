@@ -139,6 +139,34 @@ Available custom CLI commands:
 flask seed products     # Add example pharmacy products to the database
 ```
 
+#### PostgreSQL Database
+
+To inspect the database directly using PostgreSQL CLI:
+
+1. Connect to the database:
+
+```bash
+psql pharmacy_db
+```
+
+2. Useful PostgreSQL commands:
+
+```sql
+\l        # List all databases
+\dt       # List all tables in the current database
+\d TABLE  # Describe table structure
+\du       # List all users and their roles
+\q        # Quit psql
+```
+
+Example queries:
+
+```sql
+SELECT * FROM users;           # View all users
+SELECT * FROM products;        # View all products
+SELECT * FROM cart;           # View all cart items
+```
+
 ---
 
 ### Common Issues and Solutions

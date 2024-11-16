@@ -104,6 +104,8 @@ def add_to_cart(current_user):
 @token_required
 def remove_from_cart(current_user, cart_item_id):
     try:
+        quantity = request.args.get("quantity", type=int)
+
         cart_item = Cart.query.filter_by(
             id=cart_item_id, user_id=current_user.id
         ).first()
@@ -116,20 +118,73 @@ def remove_from_cart(current_user, cart_item_id):
                 }
             ), 404
 
-        db.session.delete(cart_item)
+        if quantity is not None:
+            if not isinstance(quantity, int):
+                return jsonify(
+                    {
+                        "message": "Invalid quantity",
+                        "details": "Quantity must be an integer",
+                    }
+                ), 400
+
+            if quantity <= 0:
+                return jsonify(
+                    {
+                        "message": "Invalid quantity",
+                        "details": "Quantity must be positive",
+                    }
+                ), 400
+
+            if quantity > cart_item.quantity:
+                return jsonify(
+                    {
+                        "message": "Invalid quantity",
+                        "details": f"Cannot remove {quantity} items. Only {cart_item.quantity} items in cart",
+                    }
+                ), 400
+
+            cart_item.quantity -= quantity
+
+            if cart_item.quantity == 0:
+                db.session.delete(cart_item)
+
+            result_message = (
+                f"Removed {quantity} items from cart"
+                if cart_item.quantity > 0
+                else "Removed all items from cart"
+            )
+        else:
+            db.session.delete(cart_item)
+            result_message = "Removed all items from cart"
+
         db.session.commit()
 
         return jsonify(
             {
-                "message": "Product removed from cart successfully",
-                "cart_item_id": cart_item_id,
+                "message": result_message,
+                "details": {
+                    "cart_item_id": cart_item_id,
+                    "quantity_removed": quantity
+                    if quantity is not None
+                    else cart_item.quantity,
+                    "remaining_quantity": cart_item.quantity
+                    if quantity is not None and cart_item.quantity > 0
+                    else 0,
+                },
             }
         )
 
+    except ValueError:
+        return jsonify(
+            {
+                "message": "Invalid quantity format",
+                "details": "Quantity must be a valid number",
+            }
+        ), 400
     except Exception as e:
         db.session.rollback()
         return jsonify(
-            {"message": "Failed to remove product from cart", "details": str(e)}
+            {"message": "Failed to remove items from cart", "details": str(e)}
         ), 500
 
 

@@ -10,5 +10,5 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.getenv("SECRET_KEY")
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+    TOKEN_SECRET_KEY = os.getenv("TOKEN_SECRET_KEY")
+    TOKEN_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)

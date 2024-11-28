@@ -2,15 +2,20 @@ import re
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 
-import jwt
+from config import Config
+from pyseto import Key, Paseto, VerifyError, DecryptError
 from flask import Blueprint, jsonify, request
 from werkzeug.security import check_password_hash, generate_password_hash
+from json import loads
 
 from app.models import User, db
 
 auth_bp = Blueprint("auth", __name__)
 
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+
+key = Key.new(version=4, purpose="local", key=Config.TOKEN_SECRET_KEY.encode())
+paseto = Paseto(exp=Config.TOKEN_ACCESS_TOKEN_EXPIRES.total_seconds(), include_iat=True, leeway=2)
 
 
 def validate_registration_data(data):
@@ -121,19 +126,19 @@ def token_required(f):
         try:
             if token.startswith("Bearer "):
                 token = token[7:]
-            data = jwt.decode(token, "your-secret-key", algorithms=["HS256"])
-            current_user = User.query.get(data["user_id"])
+            data = paseto.decode(key, token)
+            current_user = User.query.get(loads(data.payload.decode())["user_id"])
             if not current_user:
                 return jsonify(
                     {"message": "Invalid token", "details": "User not found"}
                 ), 401
-        except jwt.ExpiredSignatureError:
+        except VerifyError as e:
             return jsonify(
-                {"message": "Token expired", "details": "Please log in again"}
+                {"message": "Token expired", "details": str(e)}
             ), 401
-        except jwt.InvalidTokenError:
+        except DecryptError:
             return jsonify(
-                {"message": "Invalid token", "details": "Token verification failed"}
+                {"message": "Invalid token", "details": "Token decryption failed"}
             ), 401
         except Exception as e:
             return jsonify(
@@ -220,19 +225,17 @@ def login():
                 {"message": "Authentication failed", "details": "Invalid password"}
             ), 401
 
-        token = jwt.encode(
+        token = paseto.encode(
+            key,
             {
                 "user_id": user.id,
-                "exp": datetime.now(timezone.utc) + timedelta(hours=24),
             },
-            "your-secret-key",
-            algorithm="HS256",
         )
 
         return jsonify(
             {
                 "message": "Login successful",
-                "token": token,
+                "token": token.decode(),
                 "user": {"id": user.id, "username": user.username, "email": user.email},
             }
         )

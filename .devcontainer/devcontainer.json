@@ -1,0 +1,46 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+	"name": "Ubuntu",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"dockerComposeFile": "docker-compose.yml",
+    "service": "devcontainer",
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"features": {
+		"ghcr.io/va-h/devcontainers-features/uv:1": {
+			"version": "latest"
+		},
+		"ghcr.io/itsmechlark/features/postgresql:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/github-cli:1": {
+		}
+	},
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [5000],
+	"containerEnv": {
+		"DATABASE_URL": "postgresql://postgres:postgres@db:5432/postgres"
+	},
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "if [ ! -f /tmp/foo.txt ]; then printf \"SECRET_KEY=$(openssl rand -base64 32)\\nTOKEN_SECRET_KEY=$(openssl rand -base64 32)\" > ${containerWorkspaceFolder}/backend/.env; fi",
+	"updateContentCommand": "cd ${containerWorkspaceFolder}/backend && uv sync",
+
+	// Configure tool-specific properties.
+	// "customizations": {},
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	"remoteUser": "root",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"charliermarsh.ruff"
+			]
+		}
+	}
+}

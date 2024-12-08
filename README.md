@@ -8,113 +8,51 @@ This project is a pharmacy application that includes user account management, pr
 
 Follow these steps to set up the project locally:
 
-1. **Clone the Repository**
+#### 1. **Clone the Repository**
 
-   Clone the project repository and navigate to the backend directory:
-
-   ```bash
-   git clone https://github.com/hackerman70000/pharmacy-app.git
-   cd pharmacy-app/backend
-   ```
-
-2. **Create and Activate Virtual Environment**
-
-   For macOS/Linux:
-
-   ```bash
-   python -m venv venv
-   source venv/bin/activate
-   ```
-
-   For Windows:
-
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate
-   ```
-
-3. **Install Dependencies**
-
-   Install the required Python packages:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Set Up Environment Variables**
-
-   Create a `.env` file in the `backend` directory:
-
-   ```bash
-   touch .env
-   ```
-
-   Add the following content to your `.env` file:
-
-   ```bash
-   DATABASE_URL=postgresql://yourusername@localhost/pharmacy_db
-   SECRET_KEY=your-secret-key-here
-   ```
-
-5. **Create the Database**
-
-   Use the `createdb` command to create the PostgreSQL database:
-
-   ```bash
-   createdb pharmacy_db
-   ```
-
-6. **Apply Migrations**
-
-   Run the following command to apply existing database migrations:
-
-   ```bash
-   flask db upgrade
-   ```
-
-7. **Run the Development Server**
-
-   Start the Flask development server:
-
-   ```bash
-   flask run
-   ```
-
----
-
-### Development Workflow
-
-1. Pull latest changes:
+Clone the project repository and navigate to the backend directory:
 
 ```bash
-git pull origin main
+git clone https://github.com/hackerman70000/pharmacy-app.git
 ```
 
-2. Update dependencies:
+#### 2. Access the Docker Environment
+
+For an optimal development experience, it is recommended to use Visual Studio Code with the Dev Containers extension.
+
+You can access the container in two ways:
+
+1. **Reopen in Container**: In VSCode, use the "Reopen in Container" option to seamlessly open the project inside the container.
+2. **Access via Terminal**: Alternatively, you can connect to the container directly through the terminal using the appropriate Docker commands.
+
+#### 3. **Create the Database**
+
+Use the `createdb` command to create the PostgreSQL database:
 
 ```bash
-pip install -r requirements.txt
+createdb pharmacy_db
 ```
 
-3. Apply migrations:
+#### 4. **Navigate to `/backend`**
 
 ```bash
-flask db upgrade
+cd backend
 ```
 
-4. Create new branch for feature:
+#### 5. **Apply Migrations**
+
+Run the following command to apply existing database migrations:
 
 ```bash
-git checkout -b feature/your-feature-name
+uv run flask db upgrade
 ```
 
-5. Before committing:
+#### 6. **Run the Development Server**
 
-Run these commands to ensure code quality:
+Start the Flask development server:
 
 ```bash
-# Format code with ruff
-ruff format .
+uv run flask run
 ```
 
 ---
@@ -126,9 +64,9 @@ ruff format .
 To completely reset the database and its data:
 
 ```bash
-flask db downgrade base  # Go back to empty state
-flask db upgrade        # Recreate all tables
-flask seed products     # Reseed with example data
+uv run flask db downgrade base  # Go back to empty state
+uv run flask db upgrade        # Recreate all tables
+uv run flask seed products     # Reseed with example data
 ```
 
 #### CLI Commands
@@ -136,7 +74,7 @@ flask seed products     # Reseed with example data
 Available custom CLI commands:
 
 ```bash
-flask seed products     # Add example pharmacy products to the database
+uv run flask seed products     # Add example pharmacy products to the database
 ```
 
 #### PostgreSQL Database
@@ -171,21 +109,7 @@ SELECT * FROM cart;           # View all cart items
 
 ### Common Issues and Solutions
 
-1. Database connection issues:
-
-Check if PostgreSQL is running:
-
-```bash
-ps aux | grep postgres
-```
-
-Restart PostgreSQL (macOS):
-
-```bash
-brew services restart postgresql
-```
-
-2. Migration issues:
+1. Migration issues:
 
 To reset migrations:
 

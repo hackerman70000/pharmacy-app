@@ -115,7 +115,7 @@ To reset migrations:
 
 ```bash
 rm -rf migrations/
-flask db init
-flask db migrate -m "Reset migrations"
-flask db upgrade
+uv run flask db init
+uv run flask db migrate -m "Reset migrations"
+uv run flask db upgrade
 ```

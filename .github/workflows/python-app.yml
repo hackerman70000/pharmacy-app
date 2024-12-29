@@ -28,9 +28,6 @@ jobs:
         pip install uv
         cd backend
         uv sync
-    - name: Format with Ruff
-      run: |
-        uv run ruff format
     - name: Test with pytest
       run: |
         uv run pytest --cov

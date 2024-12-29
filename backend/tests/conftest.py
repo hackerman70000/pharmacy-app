@@ -9,9 +9,15 @@ from app.models import User, Product, Cart, Order
 from werkzeug.security import generate_password_hash
 
 
+def get_database_host():
+    """Get database host based on environment."""
+    return "localhost" if os.getenv("CI") else "db"
+
+
 def _create_test_db():
     """Create test database if it doesn't exist."""
-    default_db_url = "postgresql://postgres:postgres@db:5432/postgres"
+    db_host = get_database_host()
+    default_db_url = f"postgresql://postgres:postgres@{db_host}:5432/postgres"
     engine = create_engine(default_db_url)
 
     with engine.connect() as conn:
@@ -34,9 +40,8 @@ def _create_test_db():
 
 class TestConfig:
     """Test configuration."""
-
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:postgres@db:5432/pharmacy_test_db"
+    SQLALCHEMY_DATABASE_URI = f"postgresql://postgres:postgres@{get_database_host()}:5432/pharmacy_test_db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = "test_secret_key"
     TOKEN_SECRET_KEY = "test_token_secret_key" * 2

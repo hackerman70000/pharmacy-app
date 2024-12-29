@@ -29,9 +29,10 @@ class Cart(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)
 
+
 class Order(db.Model):
     __tablename__ = "orders"
-    
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     payment_intent_id = db.Column(db.String(255), unique=True, nullable=False)

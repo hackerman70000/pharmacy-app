@@ -8,6 +8,7 @@ from app.utils import mail
 db = SQLAlchemy()
 migrate = Migrate()
 
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     CORS(app)
@@ -33,6 +34,7 @@ def create_app(config_class=Config):
 
     # Register CLI commands
     from app.cli.commands import seed_cli
+
     app.cli.add_command(seed_cli)
 
     return app

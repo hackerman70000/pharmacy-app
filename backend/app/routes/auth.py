@@ -15,7 +15,9 @@ auth_bp = Blueprint("auth", __name__)
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
 key = Key.new(version=4, purpose="local", key=Config.TOKEN_SECRET_KEY.encode())
-paseto = Paseto(exp=Config.TOKEN_ACCESS_TOKEN_EXPIRES.total_seconds(), include_iat=True, leeway=2)
+paseto = Paseto(
+    exp=Config.TOKEN_ACCESS_TOKEN_EXPIRES.total_seconds(), include_iat=True, leeway=2
+)
 
 
 def validate_registration_data(data):
@@ -133,9 +135,7 @@ def token_required(f):
                     {"message": "Invalid token", "details": "User not found"}
                 ), 401
         except VerifyError as e:
-            return jsonify(
-                {"message": "Token expired", "details": str(e)}
-            ), 401
+            return jsonify({"message": "Token expired", "details": str(e)}), 401
         except DecryptError:
             return jsonify(
                 {"message": "Invalid token", "details": "Token decryption failed"}

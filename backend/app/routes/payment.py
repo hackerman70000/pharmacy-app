@@ -131,12 +131,21 @@ def get_orders(current_user):
             "details": str(e)
         }), 500
 
-@payment_bp.route("/orders/<int:order_id>", methods=["GET"])
+@payment_bp.route("/orders/<order_id>", methods=["GET"])
 @token_required
 def get_order(current_user, order_id):
     """Get specific order details"""
     try:
-        if not isinstance(order_id, int) or order_id <= 0:
+        try:
+            order_id = int(order_id)
+        except ValueError:
+            return jsonify({
+                "success": False,
+                "message": "Invalid order ID format",
+                "details": "Order ID must be a valid number"
+            }), 400
+
+        if order_id <= 0:
             return jsonify({
                 "success": False,
                 "message": "Invalid order ID",
@@ -166,12 +175,6 @@ def get_order(current_user, order_id):
             }
         })
         
-    except ValueError:
-        return jsonify({
-            "success": False,
-            "message": "Invalid order ID format",
-            "details": "Order ID must be a valid number"
-        }), 400
     except Exception as e:
         current_app.logger.error(f"Failed to fetch order details: {str(e)}")
         return jsonify({

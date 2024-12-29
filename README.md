@@ -23,6 +23,8 @@ For an optimal development experience, it is recommended to use Visual Studio Co
 You can access the container in two ways:
 
 1. **Reopen in Container**: In VSCode, use the "Reopen in Container" option to seamlessly open the project inside the container.
+   - During container creation, you'll be prompted to enter e-mail credentials for the email notification system
+
 2. **Access via Terminal**: Alternatively, you can connect to the container directly through the terminal using the appropriate Docker commands.
 
 #### 3. **Create the Database**
@@ -119,3 +121,10 @@ uv run flask db init
 uv run flask db migrate -m "Reset migrations"
 uv run flask db upgrade
 ```
+
+2. **Order Email Notifications**:
+   If order confirmation emails are not being received:
+   - Check your spam folder
+   - Verify email credentials in .env file
+   - Ensure the Gmail App Password is correct
+   - Check the application logs for email-related errors

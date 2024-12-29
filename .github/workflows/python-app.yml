@@ -1,4 +1,4 @@
-name: Pytest
+name: Backend tests
 
 on:
   push:
@@ -29,15 +29,16 @@ jobs:
           --health-retries 5
 
     env:
+      CI: true
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
       TOKEN_SECRET_KEY: ${{ secrets.TOKEN_SECRET_KEY }}
-      MAIL_SERVER: smtp.gmail.com
-      MAIL_PORT: 587
-      MAIL_USE_TLS: True
-      MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
-      MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-      MAIL_DEFAULT_SENDER: ${{ secrets.MAIL_USERNAME }}
+      MAIL_SERVER: localhost
+      MAIL_PORT: 25
+      MAIL_USE_TLS: false
+      MAIL_USERNAME: test@example.com
+      MAIL_PASSWORD: test_password
+      MAIL_DEFAULT_SENDER: test@example.com
 
     steps:
     - uses: actions/checkout@v4
@@ -50,7 +51,11 @@ jobs:
         pip install uv
         cd backend
         uv sync
-    - name: Test with pytest
+    - name: Run tests with coverage
       run: |
         cd backend
-        uv run pytest --cov
+        uv run pytest --cov=app tests/ --cov-report=term-missing --cov-fail-under=60
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

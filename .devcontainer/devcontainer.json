@@ -27,7 +27,7 @@
 	},
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "if [ ! -f /tmp/foo.txt ]; then printf \"SECRET_KEY=$(openssl rand -base64 32)\\nTOKEN_SECRET_KEY=$(openssl rand -base64 32)\" > ${containerWorkspaceFolder}/backend/.env; fi",
+	"postCreateCommand": "/bin/bash -c 'if [ ! -f ${containerWorkspaceFolder}/backend/.env ]; then echo \"Setting up environment variables...\"; read -p \"Enter Gmail address: \" email; echo \"Enter Gmail app password: \"; read -s password; echo; echo \"SECRET_KEY=$(openssl rand -base64 32)\" > ${containerWorkspaceFolder}/backend/.env; echo \"TOKEN_SECRET_KEY=$(openssl rand -base64 32)\" >> ${containerWorkspaceFolder}/backend/.env; echo \"MAIL_SERVER=smtp.gmail.com\" >> ${containerWorkspaceFolder}/backend/.env; echo \"MAIL_PORT=587\" >> ${containerWorkspaceFolder}/backend/.env; echo \"MAIL_USE_TLS=True\" >> ${containerWorkspaceFolder}/backend/.env; echo \"MAIL_USERNAME=$email\" >> ${containerWorkspaceFolder}/backend/.env; echo \"MAIL_PASSWORD=$password\" >> ${containerWorkspaceFolder}/backend/.env; echo \"MAIL_DEFAULT_SENDER=$email\" >> ${containerWorkspaceFolder}/backend/.env; fi'",
 	"updateContentCommand": "cd ${containerWorkspaceFolder}/backend && uv sync",
 
 	// Configure tool-specific properties.

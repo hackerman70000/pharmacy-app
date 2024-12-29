@@ -19,10 +19,12 @@ def create_app(config_class=Config):
     from app.routes.auth import auth_bp
     from app.routes.cart import cart_bp
     from app.routes.products import products_bp
+    from app.routes.payment import payment_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(products_bp, url_prefix="/api/products")
     app.register_blueprint(cart_bp, url_prefix="/api/cart")
+    app.register_blueprint(payment_bp, url_prefix="/api/payment")
 
     from app.cli.commands import seed_cli
 

@@ -28,3 +28,17 @@ class Cart(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)
+
+class Order(db.Model):
+    __tablename__ = "orders"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    payment_intent_id = db.Column(db.String(255), unique=True, nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(50), nullable=False)
+    items = db.Column(db.Text)
+    error_message = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, nullable=False)
+
+    user = db.relationship("User", backref=db.backref("orders", lazy=True))

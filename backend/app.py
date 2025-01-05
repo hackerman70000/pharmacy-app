@@ -8,4 +8,4 @@ cli = FlaskGroup(create_app=create_app)
 app.cli.add_command(seed_cli)
 
 if __name__ == "__main__":
-    cli()
+    app.run(host='0.0.0.0', debug=True)

@@ -19,6 +19,7 @@ def get_products():
                     "description": product.description,
                     "price": product.price,
                     "expiry_date": product.expiry_date.isoformat(),
+                    "image_url": product.image_url,
                 }
                 for product in products
             ]
@@ -67,6 +68,7 @@ def get_product(product_id):
                 "description": product.description,
                 "price": product.price,
                 "expiry_date": product.expiry_date.isoformat(),
+                "image_url": product.image_url,
             }
         )
 

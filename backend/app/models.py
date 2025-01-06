@@ -20,6 +20,7 @@ class Product(db.Model):
     description = db.Column(db.Text, nullable=True)
     price = db.Column(db.Float, nullable=False)
     expiry_date = db.Column(db.Date, nullable=False)
+    image_url = db.Column(db.String(255), nullable=True)
 
 
 class Cart(db.Model):

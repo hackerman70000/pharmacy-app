@@ -26,6 +26,7 @@ def get_cart(current_user):
                     "id": item.product_id,
                     "name": product.name,
                     "price": product.price,
+                    "image_url": product.image_url,
                 },
                 "quantity": item.quantity,
             })

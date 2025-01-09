@@ -57,6 +57,7 @@ def checkout(current_user):
                 {
                     "product_id": product.id,
                     "name": product.name,
+                    "image_url": product.image_url,
                     "quantity": cart_item.quantity,
                     "unit_price": product.price,
                     "total": item_total,

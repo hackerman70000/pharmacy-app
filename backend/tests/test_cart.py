@@ -1,5 +1,6 @@
 import pytest
 from flask import json
+from app.models import Product, Cart
 
 
 def test_get_cart(client, auth_headers, test_cart):
@@ -7,9 +8,12 @@ def test_get_cart(client, auth_headers, test_cart):
     response = client.get("/api/cart/", headers=auth_headers)
     assert response.status_code == 200
     data = json.loads(response.data)
-    assert len(data) == 1
-    assert data[0]["quantity"] == test_cart.quantity
-    assert data[0]["product"]["id"] == test_cart.product_id
+    assert "items" in data
+    assert "total" in data
+    assert len(data["items"]) == 1
+    assert data["items"][0]["quantity"] == test_cart.quantity
+    assert data["items"][0]["product"]["id"] == test_cart.product_id
+    assert data["total"] == test_cart.quantity * Product.query.get(test_cart.product_id).price
 
 
 def test_add_to_cart(client, auth_headers, test_products):
@@ -83,3 +87,58 @@ def test_cart_unauthorized(client):
     """Test accessing cart without authentication."""
     response = client.get("/api/cart/")
     assert response.status_code == 401
+
+def test_get_cart_order_and_total(client, auth_headers, test_user, test_products, db_session):
+    """Test cart sorting by ID and total price calculation."""
+
+    cart_items = [
+        Cart(user_id=test_user.id, product_id=test_products[0].id, quantity=2),
+        Cart(user_id=test_user.id, product_id=test_products[0].id, quantity=1),
+        Cart(user_id=test_user.id, product_id=test_products[1].id, quantity=3),
+    ]
+
+    for item in cart_items:
+        db_session.add(item)
+    db_session.commit()
+
+    expected_total = (
+        test_products[0].price * 2 +
+        test_products[0].price * 1 +
+        test_products[1].price * 3
+    )
+
+    response = client.get("/api/cart/", headers=auth_headers)
+    assert response.status_code == 200
+    data = json.loads(response.data)
+
+    assert "items" in data
+    assert "total" in data
+
+    items = data["items"]
+    assert len(items) == 3
+    assert items[0]["product"]["id"] == test_products[0].id
+    assert items[1]["product"]["id"] == test_products[0].id
+    assert items[2]["product"]["id"] == test_products[1].id
+
+    assert data["total"] == expected_total
+
+    response = client.put(
+        f"/api/cart/update/{items[1]['id']}", 
+        headers=auth_headers, 
+        json={"quantity": 5}
+    )
+    assert response.status_code == 200
+
+    response = client.get("/api/cart/", headers=auth_headers)
+    data = json.loads(response.data)
+
+    assert data["items"][0]["product"]["id"] == test_products[0].id
+    assert data["items"][1]["product"]["id"] == test_products[0].id
+    assert data["items"][2]["product"]["id"] == test_products[1].id
+
+    new_expected_total = (
+        test_products[0].price * 2 +
+        test_products[0].price * 5 +
+        test_products[1].price * 3
+    )
+    assert data["total"] == new_expected_total

@@ -10,21 +10,31 @@ cart_bp = Blueprint("cart", __name__)
 @token_required
 def get_cart(current_user):
     try:
-        cart_items = Cart.query.filter_by(user_id=current_user.id).all()
-        return jsonify(
-            [
-                {
-                    "id": item.id,
-                    "product": {
-                        "id": item.product_id,
-                        "name": Product.query.get(item.product_id).name,
-                        "price": Product.query.get(item.product_id).price,
-                    },
-                    "quantity": item.quantity,
-                }
-                for item in cart_items
-            ]
-        )
+        cart_items = Cart.query.filter_by(user_id=current_user.id).order_by(Cart.id).all()
+        
+        items = []
+        total = 0
+        
+        for item in cart_items:
+            product = Product.query.get(item.product_id)
+            item_total = product.price * item.quantity
+            total += item_total
+            
+            items.append({
+                "id": item.id,
+                "product": {
+                    "id": item.product_id,
+                    "name": product.name,
+                    "price": product.price,
+                },
+                "quantity": item.quantity,
+            })
+        
+        return jsonify({
+            "items": items,
+            "total": total
+        })
+        
     except Exception as e:
         return jsonify(
             {"message": "Failed to fetch cart items", "details": str(e)}

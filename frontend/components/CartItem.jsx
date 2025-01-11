@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { View, Text, Image, Platform, ActivityIndicator } from 'react-native'
 import { useState, useEffect } from 'react'
 import { icons, images } from '../constants'
 import QuantityPicker from './QuantityPicker'
@@ -12,11 +12,15 @@ const CartItem = ( { name, price, quantity, image, handleDelete, handleAdd } ) =
 
 	const [decreaseDisabled, setDecreaseDisabled] = useState(parseInt(quantity) == 1);
 
+	useEffect(() => {
+		setValue(quantity.toString())
+	}, [quantity])
+
 	const handleInputChange = (text) => {
 		if (/^\d{1,3}$/.test(text) && parseInt(text) >= 1 && parseInt(text) <= 999) {
 			setValue(text);
 		}
-		console.log(value);
+
 		setIncreaseDisabled(text == '999');
 		setDecreaseDisabled(text == '1'); 
 	}
@@ -51,12 +55,12 @@ const CartItem = ( { name, price, quantity, image, handleDelete, handleAdd } ) =
 				<Image
 					source={{ uri: image }}
 					resizeMode='contain'
-					className='w-[80px] h-[80px]'
+					className='w-[80px] h-[80px] md:w-[100px] md:h-[100px]'
 				/>
 				:
 				<ActivityIndicator size='large' className='w-[80px] h-[80px]' color='#0000ff' />
 			}
-			<View className='flex gap-5 justify-between items-start max-w-[160px]'>
+			<View className={`flex-1 gap-5 justify-between items-start ${Platform.OS !== 'web' && ''}`}>
 				<Text className='text-black text-xl font-semibold -mt-3'>{name}</Text>
 				<QuantityPicker
 					value={value}
@@ -71,7 +75,7 @@ const CartItem = ( { name, price, quantity, image, handleDelete, handleAdd } ) =
 				<Text className='text-black text-lg'>{price} zł</Text>
 				<ImageButton
 						image={icons.trash}
-						imageStyles='w-6 h-6'
+						imageStyles={`${Platform.OS === 'web' && 'max-w-6 max-h-6'} w-6 h-6`}
 						handlePress={() => handleDelete(value, true)}
 				/>
 			</View>

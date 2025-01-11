@@ -1,4 +1,4 @@
-import { View, Text, Image } from 'react-native'
+import { View, Text, Image, Platform } from 'react-native'
 import { Tabs, Redirect } from 'expo-router'
 import icons from '../../constants/icons'
 import { useGlobalContext } from '../../context/GlobalProvider'
@@ -10,7 +10,7 @@ const TabIcon = ({ icon, color, name, focused }) => {
         source={icon}
         resizeMode='contain'
         tintColor={color}
-        className='w-6 h-6'
+        className='w-6 h-6 max-w-[50px] max-h-[50px]'
       />
       <Text className={`${focused ? 'font-psemibold' : 'font-pregular'} text-xs`} style={{color: color}}>
         {name}
@@ -34,7 +34,7 @@ const TabsLayout = () => {
             backgroundColor: '#ffffff',
             borderTopWidth: 1,
             borderTopColor: '#ffffff',
-            height: 84,
+            height: Platform.OS === 'web' ? 120 : 84,
             paddingTop: 10,
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 1 },
@@ -46,6 +46,7 @@ const TabsLayout = () => {
       >
         <Tabs.Screen name='(products)' options={{
           title: 'Home',
+          href: '/home',
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
@@ -71,6 +72,7 @@ const TabsLayout = () => {
         }} />
         <Tabs.Screen name='(profile)' options={{
           title: 'Profile',
+          href: '/profile',
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon

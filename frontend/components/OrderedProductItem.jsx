@@ -18,7 +18,7 @@ const OrderedProductItem = ({ name, quantity, price, total, image, onClick }) =>
         :
         <ActivityIndicator size='medium' className='w-[80px] h-[80px]' color='#0000ff' />
       }
-			<View className='flex gap-2'>
+			<View className='flex-1 gap-2'>
         <Text className='text-xl font-semibold'>{name}</Text>
         <View className='flex-row gap-3'>
           <Text className='text-slate-500 font-semibold text-xl'>{quantity} x {price} zł</Text>

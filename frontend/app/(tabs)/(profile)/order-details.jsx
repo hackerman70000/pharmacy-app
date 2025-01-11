@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, ActivityIndicator } from 'react-native'
+import { View, Text, ScrollView, ActivityIndicator, Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import React, { useState, useEffect } from 'react'
 import OrderedProductItem from '../../../components/OrderedProductItem'
@@ -10,6 +10,8 @@ import { useGlobalContext } from '../../../context/GlobalProvider'
 const OrderDetails = () => {
 
   const { orderId } = useLocalSearchParams()
+
+  const isWeb = Platform.OS === 'web'
 
   const { state, isLoggedIn, refreshViews } = useGlobalContext()
 
@@ -27,7 +29,10 @@ const OrderDetails = () => {
   useEffect(() => {
 
     if (!isLoggedIn) {
-      router.push('/home')
+      if (isWeb)
+        window.location.href = '/home'
+      else 
+        router.replace('/home');
 
       return
     }
@@ -48,11 +53,18 @@ const OrderDetails = () => {
           total: data.order.amount,
           date: formatDate(data.order.created_at)
         })
+
         setOrderedProducts(data.order.items)
       })
       .catch(err => {
         console.log(err)
-        Alert.alert('Internal Server Error. Try again later')
+
+        const message = 'Internal Server Error. Try again later'
+        if (isWeb) { 
+          window.alert(message)
+        } else {
+          Alert.alert(message)
+        }
       })
 
     setIsLoading(false)
@@ -74,7 +86,7 @@ const OrderDetails = () => {
   return (
     <SafeAreaView className='bg-slate-100 h-full'>
         <ScrollView>
-            <View className='w-full items-center justify-center h-full gap-4 px-8'>
+            <View className='w-full items-center justify-center h-full gap-4 px-8 max-w-[1000px] self-center'>
               <Text className='text-3xl text-red font-bold self-start'>Order information:</Text>
               <View className='w-full items-start justify-center gap-2'>
                 <Text className='text-xl font-bold self-start'>Order number:</Text>

@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image, Alert, ActivityIndicator } from 'react-native'
+import { View, Text, ScrollView, Image, Alert, ActivityIndicator, Platform } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import CustomButton from '../../../components/CustomButton'
@@ -29,6 +29,8 @@ const ProductDetails = () => {
 
 	const [decreaseDisabled, setDecreaseDisabled] = useState(true)
 
+	const isWeb = Platform.OS === 'web'
+
 	useEffect(() => {
 		setIsLoading(true)
 
@@ -50,7 +52,12 @@ const ProductDetails = () => {
 			})
 			.catch(err => {
 				console.log(err)
-				Alert.alert('Internal Server Error. Try again later')
+
+				const message = 'Internal Server Error. Try again later'
+				if (isWeb)
+					window.alert(message)
+				else
+					Alert.alert(message)
 			})
 
 			setIsLoading(false)
@@ -62,7 +69,7 @@ const ProductDetails = () => {
 		if (/^\d{1,3}$/.test(text) && parseInt(text) >= 1 && parseInt(text) <= 999) {
 			setValue(text);
 		}
-		console.log(value);
+
 		setIncreaseDisabled(text == '999');
 		setDecreaseDisabled(text == '1'); 
 	}
@@ -81,7 +88,6 @@ const ProductDetails = () => {
 
 		setValue(newValue.toString());
 
-		console.log(newValue == '1');
 		setIncreaseDisabled(newValue == '999');
 		setDecreaseDisabled(newValue == '1');
 	}
@@ -89,21 +95,31 @@ const ProductDetails = () => {
 	const addToCart = () => {
 
 		if (!isLoggedIn) {
-			Alert.alert(
-				"Sign in required",
-				"You need to be signed in to add to cart. Do you want to sign in now?",
-				[
-					{
-						text: "No",
-						onPress: () => {}
-					},
-					{
-						text: "Yes",
-						onPress: () => router.push('/sign-in')
-					},
-				],
-				{ cancelable: true }
-			);
+
+			const message = "You need to be signed in to add to cart. Do you want to sign in now?"
+
+			if (isWeb) {
+				const confirm = window.confirm(message)
+
+				if (confirm) router.push('/sign-in');
+			} else {
+				Alert.alert(
+					"Sign in required",
+					message,
+					[
+						{
+							text: "No",
+							onPress: () => {}
+						},
+						{
+							text: "Yes",
+							onPress: () => router.push('/sign-in')
+						},
+					],
+					{ cancelable: true }
+				);
+			}
+
 
 			return;
 		}
@@ -127,40 +143,55 @@ const ProductDetails = () => {
 				triggerRefreshViews();
 				setIsLoading(false)
 
-				Alert.alert(
-					"Product added to cart",
-					"Product added to cart. Do you want to continue to checkout?",
-					[
-						{
-							text: "No",
-							onPress: () => {}
-						},
-						{
-							text: "Yes",
-							onPress: () => router.push('/cart')
-						},
-					],
-					{ cancelable: true }
-				);
+				const message = "Product added to cart. Do you want to continue to checkout?"
+
+				if (isWeb) {
+					const confirm = window.confirm(message)
+
+					if (confirm) router.push('/cart');
+				} else {
+					Alert.alert(
+						"Product added to cart",
+						message,
+						[
+							{
+								text: "No",
+								onPress: () => {}
+							},
+							{
+								text: "Yes",
+								onPress: () => router.push('/cart')
+							},
+						],
+						{ cancelable: true }
+					);
+				}
+
 
 			})
 			.catch(err => {
 				setIsLoading(false)
 				console.log(err)
-				Alert.alert('Internal Server Error. Try again later')
+
+				const message = 'Internal Server Error. Try again later'
+				if (isWeb){
+					window.alert(message)
+				} else {
+					Alert.alert(message)
+				}
 			})
 	}
 
   return (
     <SafeAreaView className='bg-slate-100 h-full'>
         <ScrollView>
-            <View className='w-full items-start justify-center h-full gap-4 px-8'>
+            <View className='w-full items-start justify-center h-full gap-4 px-8 max-w-[1000px] self-center'>
 								<View className='w-full self-center items-center justify-center bg-[#ffffff] rounded-xl shadow-sm'>
 									{productInfo.imageUrl ?
 										<Image
 												source={{ uri: productInfo.imageUrl }}
 												resizeMode='contain'
-												className='w-[250px] h-[250px] self-center'
+												className='w-[250px] h-[250px] sm:w-[300px] sm:h-[300px] md:w-[350px] md:h-[350px] self-center'
 										/>
 										:
 										<ActivityIndicator size='large' className='w-[250px] h-[250px] self-center' color='#0000ff' />

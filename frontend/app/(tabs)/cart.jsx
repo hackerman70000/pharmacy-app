@@ -1,15 +1,17 @@
-import { View, Text, ScrollView, ActivityIndicator, Alert } from 'react-native'
+import { View, Text, ScrollView, ActivityIndicator, Alert, Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import React, { useEffect, useState } from 'react'
-import router from 'expo-router'
-import { images } from '../../constants'
-import { icons } from '../../constants'
+import { useRouter } from 'expo-router'
 import CartItem from '../../components/CartItem'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { API_URL } from '../_layout'
 import CustomButton from '../../components/CustomButton'
 
 const Cart = () => {
+
+  const router = useRouter()
+
+  const isWeb = Platform.OS === 'web'
 
 	const { isLoggedIn, state, refreshViews, triggerRefreshViews } = useGlobalContext()
 
@@ -19,12 +21,17 @@ const Cart = () => {
 
   const [total, setTotal] = useState('')
 
+
   useEffect(() => {
 
     setIsLoading(true)
 
     if (!isLoggedIn) {
-      router.replace('/home');
+
+      if (isWeb)
+        window.location.href = '/home'
+      else 
+        router.replace('/home');
 
       return;
     }
@@ -42,7 +49,13 @@ const Cart = () => {
       })
       .catch(err => {
         console.log(err)
-        Alert.alert('Internal Server Error. Try again later')
+
+        const message = 'Internal Server Error. Try again later'
+        if (isWeb) {
+          window.alert(message)
+        } else {
+          Alert.alert(message)
+        }
       })
 
     setIsLoading(false)
@@ -53,40 +66,80 @@ const Cart = () => {
 
     if (showAlert) {
 
-      Alert.alert(
-        "Remove Product",
-        "Are you sure you want to remove this product from cart?",
-        [
-          {
-            text: "No",
-            onPress: () => {}
-          },
-          {
-            text: "Yes",
-            onPress: () => {
-              setIsLoading(true)
+      const message = "Are you sure you want to remove this product from cart?"
 
-              fetch(`${API_URL}/cart/remove/${cartId}?quantity=${quantity}`, {
-                method: 'DELETE',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${state.token}`
-                },
-              }).then(res => res.json())
-                .then(data => {
-                  triggerRefreshViews()
-                })
-                .catch(err => {
-                  console.log(err)
-                  Alert.alert('Internal Server Error. Try again later')
-                })
+      if (isWeb) {
+        const confirm = window.confirm(message)
 
-              setIsLoading(false)
-            }
-          },
-        ],
-        { cancelable: true }
-      );
+        if (confirm) {
+          setIsLoading(true)
+  
+          fetch(`${API_URL}/cart/remove/${cartId}?quantity=${quantity}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${state.token}`
+            },
+          }).then(res => res.json())
+            .then(data => {
+              triggerRefreshViews()
+            })
+            .catch(err => {
+              console.log(err)
+
+              const errorMessage = 'Internal Server Error. Try again later'
+              if (isWeb) {
+                window.alert(errorMessage)
+              } else {
+                Alert.alert(errorMessage)
+              }
+            })
+
+          setIsLoading(false)
+        }
+      } else {
+        Alert.alert(
+          "Remove Product",
+          message,
+          [
+            {
+              text: "No",
+              onPress: () => {}
+            },
+            {
+              text: "Yes",
+              onPress: () => {
+                setIsLoading(true)
+  
+                fetch(`${API_URL}/cart/remove/${cartId}?quantity=${quantity}`, {
+                  method: 'DELETE',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${state.token}`
+                  },
+                }).then(res => res.json())
+                  .then(data => {
+                    triggerRefreshViews()
+                  })
+                  .catch(err => {
+                    console.log(err)
+                    
+                    const errorMessage = 'Internal Server Error. Try again later'
+                    if (isWeb) {
+                      window.alert(errorMessage)
+                    } else {
+                      Alert.alert(errorMessage)
+                    }
+                  })
+  
+                setIsLoading(false)
+              }
+            },
+          ],
+          { cancelable: true }
+        );
+      }
+
 
     } else {
 
@@ -101,11 +154,16 @@ const Cart = () => {
       }).then(res => res.json())
         .then(data => {
           triggerRefreshViews()
-          console.log(data)
         })
         .catch(err => {
           console.log(err)
-          Alert.alert('Internal Server Error. Try again later')
+
+          const errorMessage = 'Internal Server Error. Try again later'
+          if (isWeb) {
+            window.alert(message)
+          } else {
+            Alert.alert(message)
+          }
         })
 
         setIsLoading(false)
@@ -136,7 +194,13 @@ const Cart = () => {
       })
       .catch(err => {
         console.log(err)
-        Alert.alert('Internal Server Error. Try again later')
+
+        const message = 'Internal Server Error. Try again later'
+        if (isWeb) {
+          window.alert(message)
+        } else {
+          Alert.alert(message)
+        }
       })
 
       setIsLoading(false)
@@ -145,44 +209,100 @@ const Cart = () => {
 
   const handleCheckout = () => {
 
-    Alert.alert(
-      "Confirm Checkout",
-      "Are you sure you want to checkout?",
-      [
-        {
-          text: "No",
-          onPress: () => {}
-        },
-        {
-          text: "Yes",
-          onPress: () => {
-            setIsLoading(true)
+    const message = "Are you sure you want to checkout?"
 
-            fetch(`${API_URL}/payment/checkout`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${state.token}`
-              },
-            }).then(res => res.json())
-              .then(data => {
-        
-                triggerRefreshViews();
-        
-                Alert.alert('Checkout successful. Check your email for order details or go to Profile');
-        
-              })
-              .catch(err => {
-                console.log(err)
-                Alert.alert('Internal Server Error. Try again later')
-              })
+    if (isWeb) {
+      const confirm = window.confirm(message)
 
-              setIsLoading(false)
-          }
-        },
-      ],
-      { cancelable: true }
-    );
+      if (confirm) {
+        setIsLoading(true)
+  
+        fetch(`${API_URL}/payment/checkout`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${state.token}`
+          },
+        }).then(res => res.json())
+          .then(data => {
+    
+            triggerRefreshViews();
+
+            const infoMessage = 'Checkout successful. Check your email for order details or go to Profile'
+
+            if (isWeb) {
+              window.alert(infoMessage)
+            } else {
+              Alert.alert(infoMessage);
+            }
+    
+          })
+          .catch(err => {
+            console.log(err)
+
+            const errorMesssage = 'Internal Server Error. Try again later'
+            if (isWeb) {
+              window.alert(errorMesssage)
+            } else {
+              Alert.alert(errorMesssage)
+            }
+          })
+
+          setIsLoading(false)
+      }
+    } else {
+      Alert.alert(
+        "Confirm Checkout",
+        message,
+        [
+          {
+            text: "No",
+            onPress: () => {}
+          },
+          {
+            text: "Yes",
+            onPress: () => {
+              setIsLoading(true)
+  
+              fetch(`${API_URL}/payment/checkout`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${state.token}`
+                },
+              }).then(res => res.json())
+                .then(data => {
+          
+                  triggerRefreshViews();
+
+                  const infoMessage = 'Checkout successful. Check your email for order details or go to Profile'
+
+                  if (isWeb) {
+                    window.alert(infoMessage)
+                  } else {
+                    Alert.alert(infoMessage);
+                  }
+          
+                })
+                .catch(err => {
+                  console.log(err)
+
+                  const errorMesssage = 'Internal Server Error. Try again later'
+                  if (isWeb) {
+                    window.alert(errorMesssage)
+                  } else {
+                    Alert.alert(errorMesssage)
+                  }
+                })
+  
+                setIsLoading(false)
+            }
+          },
+        ],
+        { cancelable: true }
+      );
+    }
+
 
   }
 
@@ -202,7 +322,7 @@ const Cart = () => {
   return (
     <SafeAreaView className='bg-slate-100 h-full'>
         <ScrollView>
-            <View className='w-full items-center justify-center h-full gap-6 pt-4 px-8'>
+            <View className='w-full items-center justify-center h-full gap-6 pt-4 px-8 max-w-[1000px] self-center'>
               <Text className='text-3xl text-red font-bold self-start'>Your cart:</Text>
               {cartItems}
               {products.length === 0 ?

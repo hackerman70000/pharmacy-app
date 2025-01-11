@@ -13,6 +13,8 @@ const SignIn = () => {
     password: ''
   })
 
+  const isWeb = Platform.OS === 'web'
+
   const [isSubmitting, setisSubmitting] = useState(false)
 
   const [message, setMessage] = useState('')
@@ -26,7 +28,10 @@ const SignIn = () => {
   useEffect(() => {
 
     if (isLoggedIn) {
-      router.replace('/home')
+      if (isWeb)
+        window.location.href = '/home'
+      else 
+        router.replace('/home');
     }
 
     if (username) {
@@ -69,11 +74,17 @@ const SignIn = () => {
       .catch(err => {
         console.log(err)
         setIsLoading(false)
-        Alert.alert('Internal Server Error. Try again later')
         setForm({
           username: '',
           password: ''
         })
+
+        const message = 'Internal Server Error. Try again later'
+        if (isWeb) {
+          window.alert(message)
+        } else {
+          Alert.alert(message)
+        }
       })
   }
 
@@ -83,7 +94,7 @@ const SignIn = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView>
-        <View className='w-full justify-center min-h-[85vh] px-8 my-6'>
+        <View className='w-full justify-center min-h-[85vh] px-8 my-6 max-w-[800px] self-center'>
           <Text className='text-2xl text-red mt-10 font-psemibold'>Log in to MedShop</Text>
           <Text className='text-lg text-red text-center font-bold -mb-5 mt-2'>{message}</Text>
           <FormField
@@ -112,6 +123,12 @@ const SignIn = () => {
               Sign Up
             </Link>
           </View>
+          <CustomButton
+            title='Go back to Home'
+            handlePress={() => router.push('/home')}
+            containerStyles='mt-7 w-48 self-center'
+            isLoading={isSubmitting}
+          />
         </View>
       </ScrollView>
       {isLoading && (

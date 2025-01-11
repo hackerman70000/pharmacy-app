@@ -15,6 +15,8 @@ const SignUp = () => {
     password: ''
   })
 
+  const isWeb = Platform.OS === 'web'
+
   const [isSubmitting, setisSubmitting] = useState(false)
 
   const [message, setMessage] = useState('')
@@ -25,7 +27,10 @@ const SignUp = () => {
 
   useEffect(() => {
     if (isLoggedIn) {
-      router.replace('/home')
+      if (isWeb)
+        window.location.href = '/home'
+      else 
+        router.replace('/home');
     }
   }, [])
 
@@ -44,7 +49,12 @@ const SignUp = () => {
         setIsLoading(false)
 
         if (data.message == 'Registration successful') {
-          alert('Account created successfully! You can now sign in')
+          const message = 'Account created successfully! You can now sign in'
+          if (isWeb){
+            window.alert(message)
+          } else {
+            alert(message)
+          }
           router.replace(`/sign-in?username=${form.username}`)
         } else {
           setMessage(`${data.message}! ${data.details}`)
@@ -57,12 +67,18 @@ const SignUp = () => {
       .catch(err => {
         console.log(err)
         setIsLoading(false)
-        Alert.alert('Internal Server Error. Try again later')
         setForm({
           username: '',
           email: '',
           password: ''
         })
+
+        const message = 'Internal Server Error. Try again later'
+        if (isWeb) {
+          window.alert(message)
+        } else {
+          Alert.alert(message)
+        }
       })
   }
 
@@ -72,7 +88,7 @@ const SignUp = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView>
-        <View className='w-full justify-center min-h-[85vh] px-8 my-6'>
+        <View className='w-full justify-center min-h-[85vh] px-8 my-6 max-w-[800px] self-center'>
           <Text className='text-2xl text-red mt-10 font-psemibold'>Register to MedShop</Text>
           <Text className='text-lg text-red text-center font-bold -mb-5 mt-2'>{message}</Text>
           <FormField
@@ -108,6 +124,12 @@ const SignUp = () => {
               Sign In
             </Link>
           </View>
+          <CustomButton
+            title='Go back to Home'
+            handlePress={() => router.push('/home')}
+            containerStyles='mt-7 w-48 self-center'
+            isLoading={isSubmitting}
+          />
         </View>
       </ScrollView>
       {isLoading && (

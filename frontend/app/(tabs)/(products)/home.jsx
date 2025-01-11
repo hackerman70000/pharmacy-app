@@ -1,13 +1,13 @@
-import { View, Text, ScrollView, Alert, ActivityIndicator } from 'react-native'
+import { View, Text, ScrollView, Alert, ActivityIndicator, Platform } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { images } from '../../../constants'
 import Item from '../../../components/Item'
 import { router } from 'expo-router'
-import { useGlobalContext } from '../../../context/GlobalProvider'
 import { API_URL } from '../../_layout'
 
 const Home = () => {
+	const isWeb = Platform.OS === 'web'
+
 	const [ products, setProducts ] = useState([])
 
 	const [isLoading, setIsLoading] = useState(false)
@@ -16,7 +16,7 @@ const Home = () => {
 
 		setIsLoading(true)
 
-		fetch(`${API_URL}/products`, {
+		fetch(`${API_URL}/products/`, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json'
@@ -27,7 +27,13 @@ const Home = () => {
 			})
 			.catch(err => {
 				console.log(err)
-				Alert.alert('Internal Server Error. Try again later')
+
+				const message = 'Internal Server Error. Try again later'
+				if (isWeb) {
+					window.alert(message)
+				} else {
+					Alert.alert(message)
+				}
 			})
 
 		setIsLoading(false)
@@ -47,12 +53,14 @@ const Home = () => {
   return (
     <SafeAreaView className='bg-slate-100 h-full'>
         <ScrollView>
-            <Text className={`pt-4 px-8 text-3xl text-red font-bold self-start ${products.length == 0 && 'self-center'}`}>
-							{products.length > 0 ? 'All products:' : 'No products available'}
-						</Text>
-            <View className='w-full items-start justify-center h-full flex-row flex-wrap gap-6 pt-4'>
-							{productItems}
-            </View>
+						<View className={`${isWeb && 'max-w-[1000px] self-center'}`}>
+							<Text className={`pt-4 px-8 text-3xl text-red font-bold self-start ${products.length == 0 && 'self-center'}`}>
+								{products.length > 0 ? 'All products:' : 'No products available'}
+							</Text>
+							<View className='w-full items-start justify-center h-full flex-row flex-wrap gap-6 pt-4'>
+								{productItems}
+							</View>
+						</View>
         </ScrollView>
 				{isLoading && (
 					<View className="absolute inset-0 bg-slate-700/50 flex justify-center items-center">

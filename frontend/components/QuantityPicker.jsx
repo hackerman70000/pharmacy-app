@@ -1,24 +1,25 @@
-import { View, TextInput, Image, TouchableOpacity } from 'react-native'
+import { View, TextInput, Image, TouchableOpacity, Platform } from 'react-native'
 import { useState } from 'react'
 import { icons } from '../constants'
 
 const QuantityPicker = ({ value, increaseDisabled, decreaseDisabled, handleInputChange, increaseValue, decreaseValue }) => {
 
   return (
-    <View className='flex-row items-center justify-center'>
+    <View className='flex-row items-center justify-center border rounded-l-2xl rounded-r-2xl'>
         <TouchableOpacity
 					onPress={decreaseValue}
 					activeOpacity={0.7}
 					disabled={decreaseDisabled}
+					className='px-2'
 				>
 					<Image
 							source={icons.minus}
 							resizeMode='contain'
-							className='w-[30px] h-[35px] px-2 border rounded-l-2xl'
+							className={`${Platform.OS === 'web' && 'max-w-[25px] max-h-[35px]'} w-[20px] h-[35px]`}
 					/>
 				</TouchableOpacity>
 				<TextInput
-						className='text-black h-[35px] px-4 text-xl border-y'
+						className={`${Platform.OS === 'web' && 'max-w-16 text-center pb-0'} pb-2 text-black h-[35px] px-4 text-xl border-x`}
 						value={value}
 						onChangeText={handleInputChange}
 						keyboardType="numeric"
@@ -29,11 +30,12 @@ const QuantityPicker = ({ value, increaseDisabled, decreaseDisabled, handleInput
 					onPress={increaseValue}
 					activeOpacity={0.7}
 					disabled={increaseDisabled}
+					className='px-2'
 				>
 					<Image
 							source={icons.plus}
 							resizeMode='contain'
-							className='w-[30px] h-[35px] px-2 border rounded-r-2xl'
+							className={`${Platform.OS === 'web' && 'max-w-[25px] max-h-[35px]'} w-[20px] h-[35px]`}
 					/>
 				</TouchableOpacity>
     </View>

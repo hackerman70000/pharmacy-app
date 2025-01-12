@@ -1,15 +1,14 @@
-import pytest
-from flask import json
 from datetime import datetime
 from unittest.mock import patch
-from app.models import Order, Cart
+
+from app.models import Cart, Order, OrderItem
 
 
 def test_checkout_empty_cart(client, auth_headers):
     """Test checkout with empty cart."""
     response = client.post("/api/payment/checkout", headers=auth_headers)
     assert response.status_code == 400
-    data = json.loads(response.data)
+    data = response.json
     assert data["message"] == "Cart is empty"
     assert not data["success"]
 
@@ -22,7 +21,7 @@ def test_checkout_success(client, auth_headers, test_cart, test_products):
         response = client.post("/api/payment/checkout", headers=auth_headers)
 
         assert response.status_code == 200
-        data = json.loads(response.data)
+        data = response.json
         assert data["success"]
         assert "order" in data
         assert data["email_sent"]
@@ -37,7 +36,6 @@ def test_checkout_with_multiple_items(
     client, auth_headers, test_user, test_products, db_session
 ):
     """Test checkout with multiple items in cart."""
-
     cart_items = [
         Cart(user_id=test_user.id, product_id=test_products[0].id, quantity=2),
         Cart(user_id=test_user.id, product_id=test_products[1].id, quantity=1),
@@ -52,7 +50,7 @@ def test_checkout_with_multiple_items(
         response = client.post("/api/payment/checkout", headers=auth_headers)
 
         assert response.status_code == 200
-        data = json.loads(response.data)
+        data = response.json
         assert data["success"]
 
         expected_total = (test_products[0].price * 2) + (test_products[1].price * 1)
@@ -60,70 +58,70 @@ def test_checkout_with_multiple_items(
         assert len(data["order"]["items"]) == 2
 
 
-def test_get_orders(client, auth_headers, test_user, db_session):
+def test_get_orders(client, auth_headers, test_user, test_products, db_session):
     """Test getting user's order history."""
-
     order = Order(
         user_id=test_user.id,
         payment_intent_id="TEST-123",
         amount=99.99,
         status="completed",
-        items=json.dumps(
-            [
-                {
-                    "product_id": 1,
-                    "quantity": 1,
-                    "name": "Test Product",
-                    "unit_price": 99.99,
-                    "total": 99.99,
-                }
-            ]
-        ),
         created_at=datetime.utcnow(),
     )
     db_session.add(order)
     db_session.commit()
 
+    order_item = OrderItem(
+        order_id=order.id,
+        product_id=test_products[0].id,
+        quantity=1,
+        unit_price=99.99,
+        total=99.99,
+    )
+    db_session.add(order_item)
+    db_session.commit()
+
     response = client.get("/api/payment/orders", headers=auth_headers)
 
     assert response.status_code == 200
-    data = json.loads(response.data)
+    data = response.json
     assert data["success"]
     assert len(data["orders"]) == 1
     assert data["orders"][0]["order_number"] == "TEST-123"
     assert data["orders"][0]["amount"] == 99.99
 
 
-def test_get_specific_order(client, auth_headers, test_user, db_session):
+def test_get_specific_order(client, auth_headers, test_user, test_products, db_session):
     """Test getting specific order details."""
     order = Order(
         user_id=test_user.id,
         payment_intent_id="TEST-456",
         amount=149.99,
         status="completed",
-        items=json.dumps(
-            [
-                {
-                    "product_id": 1,
-                    "quantity": 1,
-                    "name": "Test Product",
-                    "unit_price": 149.99,
-                    "total": 149.99,
-                }
-            ]
-        ),
         created_at=datetime.utcnow(),
     )
     db_session.add(order)
     db_session.commit()
 
+    order_item = OrderItem(
+        order_id=order.id,
+        product_id=test_products[0].id,
+        quantity=1,
+        unit_price=149.99,
+        total=149.99,
+    )
+    db_session.add(order_item)
+    db_session.commit()
+
     response = client.get(f"/api/payment/orders/{order.id}", headers=auth_headers)
 
     assert response.status_code == 200
-    data = json.loads(response.data)
+    data = response.json
     assert data["success"]
     assert data["order"]["order_number"] == "TEST-456"
     assert data["order"]["amount"] == 149.99
+    assert len(data["order"]["items"]) == 1
+    assert data["order"]["items"][0]["quantity"] == 1
+    assert data["order"]["items"][0]["unit_price"] == 149.99
 
 
 def test_get_nonexistent_order(client, auth_headers):
@@ -131,7 +129,7 @@ def test_get_nonexistent_order(client, auth_headers):
     response = client.get("/api/payment/orders/99999", headers=auth_headers)
 
     assert response.status_code == 404
-    data = json.loads(response.data)
+    data = response.json
     assert not data["success"]
     assert "not found" in data["message"].lower()
 
@@ -141,6 +139,6 @@ def test_get_order_invalid_id(client, auth_headers):
     response = client.get("/api/payment/orders/invalid", headers=auth_headers)
 
     assert response.status_code == 400
-    data = json.loads(response.data)
+    data = response.json
     assert not data["success"]
     assert "invalid" in data["message"].lower()

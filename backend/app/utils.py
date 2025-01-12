@@ -1,10 +1,8 @@
 from flask import render_template
 from flask_mail import Mail, Message
 from flask import current_app
-import json
 
 mail = Mail()
-
 
 def send_order_confirmation_email(order):
     """Send order confirmation email with receipt to customer"""
@@ -15,20 +13,17 @@ def send_order_confirmation_email(order):
             recipients=[order.user.email],
         )
 
-        try:
-            items = json.loads(order.items) if order.items else []
-        except:
-            items = []
-            current_app.logger.error("Failed to parse order items")
-
         msg.html = render_template(
-            "email/order_confirmation.html", order=order, user=order.user, items=items
+            "email/order_confirmation.html", 
+            order=order, 
+            user=order.user, 
+            items=order.items
         )
 
         items_text = "\n".join(
             [
-                f"- {item['name']}: {item['quantity']} x ${item['unit_price']:.2f} = ${item['total']:.2f}"
-                for item in items
+                f"- {item.product.name}: {item.quantity} x ${item.unit_price:.2f} = ${item.total:.2f}"
+                for item in order.items
             ]
         )
 

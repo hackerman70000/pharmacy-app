@@ -7,9 +7,11 @@
         .header { text-align: center; padding: 20px 0; }
         .order-details { margin: 20px 0; }
         .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        .items-table th, .items-table td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+        .items-table th, .items-table td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: middle; }
         .total { text-align: right; margin-top: 20px; }
         .footer { text-align: center; margin-top: 30px; font-size: 0.9em; color: #666; }
+        .product-info { display: flex; align-items: center; gap: 10px; }
+        .product-image { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -38,7 +40,12 @@
             <tbody>
                 {% for item in items %}
                 <tr>
-                    <td>{{ item.name }}</td>
+                    <td>
+                        <div class="product-info">
+                            <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="product-image">
+                            <span>{{ item.product.name }}</span>
+                        </div>
+                    </td>
                     <td>{{ item.quantity }}</td>
                     <td>${{ "%.2f"|format(item.unit_price) }}</td>
                     <td>${{ "%.2f"|format(item.total) }}</td>

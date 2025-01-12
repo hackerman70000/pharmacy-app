@@ -2,7 +2,7 @@ import { Stack, Slot } from 'expo-router'
 import '../global.css'
 import GlobalProvider from '../context/GlobalProvider'
 
-export const API_URL = 'http://192.168.0.69:5000/api'
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:80/api'
 
 const RootLayout = () => {
     

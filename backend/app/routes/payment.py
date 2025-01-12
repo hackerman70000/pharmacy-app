@@ -1,10 +1,11 @@
-from flask import Blueprint, jsonify, request, current_app
-from app.models import Cart, Order, Product, db
+import uuid
+from datetime import datetime
+
+from flask import Blueprint, current_app, jsonify
+
+from app.models import Cart, Order, OrderItem, Product, db
 from app.routes.auth import token_required
 from app.utils import send_order_confirmation_email
-from datetime import datetime
-import json
-import uuid
 
 payment_bp = Blueprint("payment", __name__)
 
@@ -14,17 +15,6 @@ def generate_order_number():
     timestamp = datetime.utcnow().strftime("%Y%m%d")
     unique_id = str(uuid.uuid4())[:8]
     return f"PH-{timestamp}-{unique_id}"
-
-
-def parse_order_items(items_str):
-    """Safely parse order items JSON string"""
-    try:
-        if not items_str:
-            return []
-        return json.loads(items_str)
-    except json.JSONDecodeError:
-        current_app.logger.error(f"Failed to parse order items: {items_str}")
-        return []
 
 
 @payment_bp.route("/checkout", methods=["POST"])
@@ -38,7 +28,7 @@ def checkout(current_user):
             return jsonify({"success": False, "message": "Cart is empty"}), 400
 
         total_amount = 0
-        items_data = []
+        order_items = []
 
         for cart_item in cart_items:
             product = Product.query.get(cart_item.product_id)
@@ -53,15 +43,13 @@ def checkout(current_user):
             item_total = product.price * cart_item.quantity
             total_amount += item_total
 
-            items_data.append(
-                {
-                    "product_id": product.id,
-                    "name": product.name,
-                    "image_url": product.image_url,
-                    "quantity": cart_item.quantity,
-                    "unit_price": product.price,
-                    "total": item_total,
-                }
+            order_items.append(
+                OrderItem(
+                    product_id=product.id,
+                    quantity=cart_item.quantity,
+                    unit_price=product.price,
+                    total=item_total,
+                )
             )
 
         order = Order(
@@ -69,8 +57,8 @@ def checkout(current_user):
             payment_intent_id=generate_order_number(),
             amount=total_amount,
             status="completed",
-            items=json.dumps(items_data),
             created_at=datetime.utcnow(),
+            items=order_items,
         )
 
         Cart.query.filter_by(user_id=current_user.id).delete()
@@ -89,7 +77,17 @@ def checkout(current_user):
                     "id": order.id,
                     "order_number": order.payment_intent_id,
                     "amount": order.amount,
-                    "items": items_data,
+                    "items": [
+                        {
+                            "product_id": item.product_id,
+                            "name": item.product.name,
+                            "image_url": item.product.image_url,
+                            "quantity": item.quantity,
+                            "unit_price": item.unit_price,
+                            "total": item.total,
+                        }
+                        for item in order.items
+                    ],
                     "created_at": order.created_at.isoformat(),
                 },
             }
@@ -114,19 +112,27 @@ def get_orders(current_user):
             .all()
         )
 
-        orders_data = []
-        for order in orders:
-            items = parse_order_items(order.items)
-            orders_data.append(
-                {
-                    "id": order.id,
-                    "order_number": order.payment_intent_id,
-                    "amount": order.amount,
-                    "status": order.status,
-                    "items": items,
-                    "created_at": order.created_at.isoformat(),
-                }
-            )
+        orders_data = [
+            {
+                "id": order.id,
+                "order_number": order.payment_intent_id,
+                "amount": order.amount,
+                "status": order.status,
+                "items": [
+                    {
+                        "product_id": item.product_id,
+                        "name": item.product.name,
+                        "image_url": item.product.image_url,
+                        "quantity": item.quantity,
+                        "unit_price": item.unit_price,
+                        "total": item.total,
+                    }
+                    for item in order.items
+                ],
+                "created_at": order.created_at.isoformat(),
+            }
+            for order in orders
+        ]
 
         return jsonify({"success": True, "orders": orders_data})
 
@@ -173,8 +179,6 @@ def get_order(current_user, order_id):
                 }
             ), 404
 
-        items = parse_order_items(order.items)
-
         return jsonify(
             {
                 "success": True,
@@ -183,7 +187,17 @@ def get_order(current_user, order_id):
                     "order_number": order.payment_intent_id,
                     "amount": order.amount,
                     "status": order.status,
-                    "items": items,
+                    "items": [
+                        {
+                            "product_id": item.product_id,
+                            "name": item.product.name,
+                            "image_url": item.product.image_url,
+                            "quantity": item.quantity,
+                            "unit_price": item.unit_price,
+                            "total": item.total,
+                        }
+                        for item in order.items
+                    ],
                     "created_at": order.created_at.isoformat(),
                 },
             }

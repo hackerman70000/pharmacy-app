@@ -9,7 +9,7 @@ services:
     depends_on:
       - db
     networks:
-      - internal
+      - backend_net
 
   db:
     image: postgres:latest
@@ -19,7 +19,7 @@ services:
     env_file:
       - ./backend/.env
     networks:
-      - internal
+      - backend_net
 
   nginx:
     image: nginx:latest
@@ -31,30 +31,35 @@ services:
     depends_on:
       - backend
     networks:
-      - internal
+      - frontend_net
+      - backend_net
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        EXPO_PUBLIC_API_URL: http://192.168.0.69:80/api
+        EXPO_PUBLIC_API_URL: http://localhost:80/api
     restart: always
     ports:
       - "8081:8081"
     volumes:
-      - .:/frontend
-      - /frontend/node_modules
+      - ./frontend/app:/app/app
+      - ./frontend/components:/app/components
+      - ./frontend/constants:/app/constants
+      - ./frontend/context:/app/context
     stdin_open: true
     tty: true
     depends_on:
       - backend
     networks:
-      - internal
+      - frontend_net
 
 volumes:
   postgres_data:
 
 networks:
-  internal:
+  frontend_net:
+    driver: bridge
+  backend_net:
     driver: bridge

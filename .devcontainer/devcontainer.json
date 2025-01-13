@@ -1,46 +1,42 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
 {
-	"name": "Ubuntu",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"dockerComposeFile": "docker-compose.yml",
+    "name": "Dev Container",
+    "dockerComposeFile": "docker-compose.yml",
     "service": "devcontainer",
     "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-	"features": {
-		"ghcr.io/va-h/devcontainers-features/uv:1": {
-			"version": "latest"
-		},
-		"ghcr.io/itsmechlark/features/postgresql:1": {
-			"version": "latest"
-		},
-		"ghcr.io/devcontainers/features/github-cli:1": {
-		}
-	},
+    
+    "features": {
+        "ghcr.io/va-h/devcontainers-features/uv:1": {
+            "version": "latest"
+        },
+        "ghcr.io/itsmechlark/features/postgresql:1": {
+            "version": "latest"
+        },
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "18"
+        }
+    },
 
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
+    "forwardPorts": [5000, 8081],
+    
+    "containerEnv": {
+		"DATABASE_URL": "postgresql://postgres:postgres@db:5432/postgres",
+        "EXPO_PUBLIC_API_URL": "http://localhost:5000/api"
+    },
 
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [5000],
-	"containerEnv": {
-		"DATABASE_URL": "postgresql://postgres:postgres@db:5432/postgres"
-	},
-
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "/bin/bash -c 'if [ ! -f ${containerWorkspaceFolder}/backend/.env ]; then echo \"Setting up environment variables...\"; read -p \"Enter Gmail address: \" email; echo \"Enter Gmail app password: \"; read -s password; echo; echo \"SECRET_KEY=$(openssl rand -base64 32)\" > ${containerWorkspaceFolder}/backend/.env; echo \"TOKEN_SECRET_KEY=$(openssl rand -base64 32)\" >> ${containerWorkspaceFolder}/backend/.env; echo \"MAIL_SERVER=smtp.gmail.com\" >> ${containerWorkspaceFolder}/backend/.env; echo \"MAIL_PORT=587\" >> ${containerWorkspaceFolder}/backend/.env; echo \"MAIL_USE_TLS=True\" >> ${containerWorkspaceFolder}/backend/.env; echo \"MAIL_USERNAME=$email\" >> ${containerWorkspaceFolder}/backend/.env; echo \"MAIL_PASSWORD=$password\" >> ${containerWorkspaceFolder}/backend/.env; echo \"MAIL_DEFAULT_SENDER=$email\" >> ${containerWorkspaceFolder}/backend/.env; fi'",
-	"updateContentCommand": "cd ${containerWorkspaceFolder}/backend && uv sync",
-
-	// Configure tool-specific properties.
-	// "customizations": {},
-
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	"remoteUser": "root",
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"ms-python.python",
-				"charliermarsh.ruff"
-			]
-		}
-	}
+    "postCreateCommand": "bash ${containerWorkspaceFolder}/.devcontainer/scripts/post-create.sh",
+    "postStartCommand": "bash ${containerWorkspaceFolder}/.devcontainer/scripts/post-start.sh",
+    
+    "remoteUser": "root",
+    
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "charliermarsh.ruff",
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode"
+            ]
+        }
+    }
 }

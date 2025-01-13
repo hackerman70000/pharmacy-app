@@ -1,12 +1,13 @@
-version: '3.8'
 services:
   devcontainer:
     image: mcr.microsoft.com/devcontainers/base:noble
     volumes:
       - ../..:/workspaces:cached
+      - frontend-node-modules:/workspaces/${localWorkspaceFolderBasename}/frontend/node_modules
     command: sleep infinity
     ports:
       - "5000:5000"
+      - "8081:8081"
 
   db:
     image: postgres:latest
@@ -20,4 +21,4 @@ services:
 
 volumes:
   postgres-data:
-  
+  frontend-node-modules:

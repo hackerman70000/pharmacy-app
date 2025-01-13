@@ -1,38 +1,30 @@
 # Pharmacy App
 
-This project is a pharmacy application that includes user account management, product browsing, a shopping cart, and email notifications. It is designed to run on Docker and PostgreSQL with a Python backend built using Flask and React Native frontend built using Expo.
+A pharmacy application with features for user management, product browsing, shopping cart functionality, and email notifications. Built with a Flask backend and React Native frontend, running in Docker with PostgreSQL database.
 
-## Development
-
-### Setup
+## Development setup
 
 Follow these steps to set up the project locally:
 
-#### Access the Docker Environment
+### Access the Docker Environment
 
 In VSCode, use the "Reopen in Container" option to seamlessly open the project inside the container.
 
-#### Navigate to `/backend`
+### Backend setup
 
 ```bash
 cd backend
+uv run flask run -h 0.0.0.0
 ```
 
-#### Apply Migrations
-
-Run the following command to apply existing database migrations:
+### Frontend setup
 
 ```bash
-uv run flask db upgrade
+cd frontend
+npx expo start -c
 ```
 
-#### Run the Development Server
-
-Start the Flask development server:
-
-```bash
-uv run flask run
-```
+Access the application at http://localhost (Port 8081).
 
 ---
 
@@ -67,28 +59,6 @@ To run tests in the Docker container:
 
 ```bash
 docker compose exec backend uv run pytest
-```
-
-## Frontend
-
-To start developing the app all you need to do is:
-
-### Navigate to `/frontend`
-
-```bash
-cd frontend
-```
-
-### Install all dependencies
-
-```bash
-npm install
-```
-
-### Starting the app
-
-```bash
-npx expo start -c
 ```
 
 ---

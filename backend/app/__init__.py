@@ -3,6 +3,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+
 from app.utils import mail
 
 db = SQLAlchemy()
@@ -10,7 +11,7 @@ migrate = Migrate()
 
 
 def create_app(config_class=Config):
-    app = Flask(__name__)
+    app = Flask(__name__, static_url_path="/static", static_folder="static")
     CORS(app)
     app.config.from_object(config_class)
 
@@ -24,8 +25,8 @@ def create_app(config_class=Config):
     # Register blueprints
     from app.routes.auth import auth_bp
     from app.routes.cart import cart_bp
-    from app.routes.products import products_bp
     from app.routes.payment import payment_bp
+    from app.routes.products import products_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(products_bp, url_prefix="/api/products")

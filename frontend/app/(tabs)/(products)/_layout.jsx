@@ -1,6 +1,5 @@
-import { View, Text } from 'react-native'
-import React from 'react'
 import { Stack } from 'expo-router'
+import React from 'react'
 
 const ProductsLayout = () => {
   return (
@@ -18,7 +17,7 @@ const ProductsLayout = () => {
                 backgroundColor: '#f1f5f9',
               },
               headerBackTitle: 'All products',
-              headerTintColor: '#d72638',
+              headerTintColor: '#10B981',
               headerTitle: '',
               headerShadowVisible: false,
             }}

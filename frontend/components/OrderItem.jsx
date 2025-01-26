@@ -2,24 +2,48 @@ import React from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 
 const OrderItem = ({ orderId, status, total, date, onClick }) => {
+  const getStatusColor = (status) => {
+    switch(status.toLowerCase()) {
+      case 'completed':
+        return 'text-emerald-400'
+      case 'pending':
+        return 'text-amber-400'
+      case 'processing':
+        return 'text-blue-400'
+      case 'cancelled':
+        return 'text-red-400'
+      default:
+        return 'text-white'
+    }
+  }
+
   return (
     <TouchableOpacity
-      className='w-full items-center justify-between gap-2 p-4 rounded-xl border border-gray-200 shadow-sm bg-surface'
+      className='bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden'
       onPress={onClick}
       activeOpacity={0.7}
     >
-      <Text className='text-2xl self-start font-bold text-text-dark'>{orderId}</Text>
-      <View className='w-full items-center flex-row'>
-        <Text className='text-xl font-semibold text-text'>Status: </Text>
-        <Text className='text-xl text-text-light font-semibold'>{status}</Text>
-      </View>
-      <View className='w-full items-center flex-row'>
-        <Text className='text-xl font-semibold text-text'>Total: </Text>
-        <Text className='text-xl text-primary font-semibold'>${total}</Text>
-      </View>
-      <View className='w-full items-center flex-row'>
-        <Text className='text-xl font-semibold text-text'>Date: </Text>
-        <Text className='text-xl text-text-light font-semibold mr-auto'>{date}</Text>
+      <View className='p-5 space-y-4'>
+        {/* Header */}
+        <View className='flex-row justify-between items-center'>
+          <Text className='text-lg font-bold text-white'>Order #{orderId}</Text>
+          <Text className={`font-medium ${getStatusColor(status)}`}>
+            {status}
+          </Text>
+        </View>
+
+        {/* Details */}
+        <View className='space-y-2'>
+          <View className='flex-row justify-between items-center'>
+            <Text className='text-white/60'>Amount</Text>
+            <Text className='text-white font-bold'>${total}</Text>
+          </View>
+          
+          <View className='flex-row justify-between items-center'>
+            <Text className='text-white/60'>Date</Text>
+            <Text className='text-white/80'>{date}</Text>
+          </View>
+        </View>
       </View>
     </TouchableOpacity>
   )

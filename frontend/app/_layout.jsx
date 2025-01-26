@@ -1,6 +1,6 @@
-import { Stack, Slot } from 'expo-router'
-import '../global.css'
+import { Stack } from 'expo-router'
 import GlobalProvider from '../context/GlobalProvider'
+import '../global.css'
 
 export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:80/api'
 

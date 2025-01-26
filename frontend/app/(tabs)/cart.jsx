@@ -1,11 +1,11 @@
-import { View, Text, ScrollView, ActivityIndicator, Alert, Platform } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import React, { useEffect, useState } from 'react'
 import { useRouter } from 'expo-router'
+import React, { useEffect, useState } from 'react'
+import { ActivityIndicator, Alert, Platform, ScrollView, Text, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import CartItem from '../../components/CartItem'
+import CustomButton from '../../components/CustomButton'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { API_URL } from '../_layout'
-import CustomButton from '../../components/CustomButton'
 
 const Cart = () => {
 
@@ -331,7 +331,7 @@ const Cart = () => {
                 <View className='w-full items-center justify-center gap-6'>
                   <View className='w-full items-center justify-end flex-row'>
                     <Text className='text-xl font-semibold'>Total: </Text>
-                    <Text className='text-xl text-green-500 font-semibold ml-auto'>{total} zł</Text>
+                    <Text className='text-xl text-green-500 font-semibold ml-auto'>${total}</Text>
                   </View>
                   <CustomButton
                     title='Checkout'

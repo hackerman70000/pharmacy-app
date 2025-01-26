@@ -1,10 +1,10 @@
-import { View, Text, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native'
 
-import FormField from '../../components/FormField'
-import CustomButton from '../../components/CustomButton'
-import { useGlobalContext } from '../../context/GlobalProvider'
 import { Link, router, useLocalSearchParams } from 'expo-router'
+import CustomButton from '../../components/CustomButton'
+import FormField from '../../components/FormField'
+import { useGlobalContext } from '../../context/GlobalProvider'
 import { API_URL } from '../_layout'
 
 const SignIn = () => {
@@ -95,7 +95,7 @@ const SignIn = () => {
     >
       <ScrollView>
         <View className='w-full justify-center min-h-[85vh] px-8 my-6 max-w-[800px] self-center'>
-          <Text className='text-2xl text-red mt-10 font-psemibold'>Log in to MedShop</Text>
+          <Text className='text-2xl text-red mt-10 font-psemibold'>Log in to Your Pharmacy</Text>
           <Text className='text-lg text-red text-center font-bold -mb-5 mt-2'>{message}</Text>
           <FormField
             title='Username'

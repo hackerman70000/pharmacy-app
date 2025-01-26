@@ -1,11 +1,11 @@
-import { View, Text, ScrollView, Image, Alert, ActivityIndicator, Platform } from 'react-native'
+import { router, useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useState } from 'react'
+import { ActivityIndicator, Alert, Image, Platform, ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import CustomButton from '../../../components/CustomButton'
-import { API_URL } from '../../_layout'
-import { useLocalSearchParams, router } from 'expo-router'
 import QuantityPicker from '../../../components/QuantityPicker'
 import { useGlobalContext } from '../../../context/GlobalProvider'
+import { API_URL } from '../../_layout'
 
 const ProductDetails = () => {
 
@@ -201,7 +201,7 @@ const ProductDetails = () => {
 								<View className='flex-row items-center justify-between w-full'>
 									<View className='items-center flex-row'>
                 		<Text className='text-2xl mr-auto font-semibold'>Price: </Text>
-										<Text className='text-2xl text-slate-500 mr-auto font-semibold'>{productInfo.price} zł</Text>
+										<Text className='text-2xl text-slate-500 mr-auto font-semibold'>${productInfo.price}</Text>
 									</View>
 									<QuantityPicker
 										value={value}

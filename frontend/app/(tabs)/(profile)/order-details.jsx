@@ -1,11 +1,11 @@
-import { View, Text, ScrollView, ActivityIndicator, Platform } from 'react-native'
+import { router, useLocalSearchParams } from 'expo-router'
+import React, { useEffect, useState } from 'react'
+import { ActivityIndicator, Platform, ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import React, { useState, useEffect } from 'react'
 import OrderedProductItem from '../../../components/OrderedProductItem'
-import { useLocalSearchParams, router } from 'expo-router'
+import { useGlobalContext } from '../../../context/GlobalProvider'
 import { API_URL } from '../../_layout'
 import { formatDate } from './profile'
-import { useGlobalContext } from '../../../context/GlobalProvider'
 
 const OrderDetails = () => {
 
@@ -94,7 +94,7 @@ const OrderDetails = () => {
                 <Text className='text-xl font-bold self-start'>Status:</Text>
                 <Text className='text-xl text-slate-500 font-semibold self-start'>{orderInfo.status}</Text>
                 <Text className='text-xl font-bold self-start'>Total:</Text>
-                <Text className='text-xl text-slate-500 font-semibold self-start'>{orderInfo.total} zł</Text>
+                <Text className='text-xl text-slate-500 font-semibold self-start'>${orderInfo.total}</Text>
                 <Text className='text-xl font-bold self-start'>Date:</Text>
                 <Text className='text-xl text-slate-500 font-semibold self-start'>{orderInfo.date}</Text>
               </View>

@@ -1,14 +1,15 @@
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from functools import wraps
-
-from config import Config
-from pyseto import Key, Paseto, VerifyError, DecryptError
-from flask import Blueprint, jsonify, request
-from werkzeug.security import check_password_hash, generate_password_hash
 from json import loads
 
+from config import Config
+from flask import Blueprint, jsonify, request
+from pyseto import DecryptError, Key, Paseto, VerifyError
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from app.models import User, db
+from app.utils import send_verification_email
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -180,25 +181,142 @@ def register():
             ), 409
 
         hashed_password = generate_password_hash(password)
-        new_user = User(username=username, email=email, password=hashed_password)
+        new_user = User(
+            username=username,
+            email=email,
+            password=hashed_password,
+            email_verified=False,
+        )
+
+        new_user.generate_verification_token()
 
         db.session.add(new_user)
         db.session.commit()
 
-        return jsonify(
-            {
-                "message": "Registration successful",
-                "user": {
-                    "id": new_user.id,
-                    "username": new_user.username,
-                    "email": new_user.email,
-                },
-            }
-        ), 201
+        if send_verification_email(new_user):
+            return jsonify(
+                {
+                    "message": "Registration successful",
+                    "details": "Please check your email to verify your account",
+                    "user": {
+                        "id": new_user.id,
+                        "username": new_user.username,
+                        "email": new_user.email,
+                        "email_verified": new_user.email_verified,
+                    },
+                }
+            ), 201
+        else:
+            return jsonify(
+                {
+                    "message": "Registration successful but verification email failed",
+                    "details": "Please contact support to verify your email",
+                }
+            ), 201
 
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": "Registration failed", "details": str(e)}), 500
+
+
+@auth_bp.route("/verify-email/<token>", methods=["GET"])
+def verify_email(token):
+    try:
+        user = User.query.filter_by(verification_token=token).first()
+
+        if not user:
+            return jsonify(
+                {
+                    "message": "Invalid verification token",
+                    "details": "Token not found or already used",
+                }
+            ), 404
+
+        if user.email_verified:
+            return jsonify(
+                {
+                    "message": "Email already verified",
+                    "details": "Your email has already been verified",
+                }
+            ), 400
+
+        if user.verification_token_expires < datetime.now(timezone.utc):
+            return jsonify(
+                {
+                    "message": "Verification token expired",
+                    "details": "Please request a new verification email",
+                }
+            ), 400
+
+        user.email_verified = True
+        user.verification_token = None
+        user.verification_token_expires = None
+        db.session.commit()
+
+        return jsonify(
+            {
+                "message": "Email verified successfully",
+                "details": "You can now log in to your account",
+            }
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": "Email verification failed", "details": str(e)}), 500
+
+
+@auth_bp.route("/resend-verification", methods=["POST"])
+def resend_verification():
+    try:
+        data = request.get_json()
+
+        if not data or "email" not in data:
+            return jsonify(
+                {"message": "Invalid request", "details": "Email is required"}
+            ), 400
+
+        email = str(data["email"]).strip().lower()
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            return jsonify(
+                {
+                    "message": "User not found",
+                    "details": "No account found with this email",
+                }
+            ), 404
+
+        if user.email_verified:
+            return jsonify(
+                {
+                    "message": "Email already verified",
+                    "details": "Your email has already been verified",
+                }
+            ), 400
+
+        user.generate_verification_token()
+        db.session.commit()
+
+        if send_verification_email(user):
+            return jsonify(
+                {
+                    "message": "Verification email sent",
+                    "details": "Please check your email to verify your account",
+                }
+            )
+        else:
+            return jsonify(
+                {
+                    "message": "Failed to send verification email",
+                    "details": "Please try again later",
+                }
+            ), 500
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(
+            {"message": "Failed to resend verification email", "details": str(e)}
+        ), 500
 
 
 @auth_bp.route("/login", methods=["POST"])
@@ -220,6 +338,14 @@ def login():
                 {"message": "Authentication failed", "details": "User not found"}
             ), 401
 
+        if not user.email_verified:
+            return jsonify(
+                {
+                    "message": "Email not verified",
+                    "details": "Please verify your email before logging in",
+                }
+            ), 401
+
         if not check_password_hash(user.password, password):
             return jsonify(
                 {"message": "Authentication failed", "details": "Invalid password"}
@@ -236,7 +362,12 @@ def login():
             {
                 "message": "Login successful",
                 "token": token.decode(),
-                "user": {"id": user.id, "username": user.username, "email": user.email},
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "email_verified": user.email_verified,
+                },
             }
         )
 
@@ -253,6 +384,7 @@ def get_current_user(current_user):
                 "id": current_user.id,
                 "username": current_user.username,
                 "email": current_user.email,
+                "email_verified": current_user.email_verified,
             }
         )
     except Exception as e:

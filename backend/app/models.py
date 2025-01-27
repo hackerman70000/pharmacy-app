@@ -1,4 +1,5 @@
-from datetime import datetime
+import secrets
+from datetime import datetime, timedelta, timezone
 
 from app import db
 
@@ -8,8 +9,17 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(256), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    password = db.Column(db.String(255), nullable=False)
+    email_verified = db.Column(db.Boolean, default=False)
+    verification_token = db.Column(db.String(100), unique=True)
+    verification_token_expires = db.Column(db.DateTime(timezone=True))
+
+    def generate_verification_token(self):
+        self.verification_token = secrets.token_urlsafe(32)
+        self.verification_token_expires = datetime.now(timezone.utc) + timedelta(
+            hours=24
+        )
+        return self.verification_token
 
 
 class Product(db.Model):

@@ -1,8 +1,9 @@
 import { Link, router, useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, ImageBackground, KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, ImageBackground, KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native'
 import CustomButton from '../../components/CustomButton'
 import FormField from '../../components/FormField'
+import ToastMessage from '../../components/ToastMessage'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { API_URL } from '../_layout'
 
@@ -16,6 +17,7 @@ const SignIn = () => {
   const [isSubmitting, setisSubmitting] = useState(false)
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [toast, setToast] = useState(null)
   const { isLoggedIn, setIsLoggedIn, setState } = useGlobalContext()
   const { username } = useLocalSearchParams()
 
@@ -53,6 +55,17 @@ const SignIn = () => {
           })
           setMessage('')
           router.replace('/home')
+        } else if (data.message === 'Email not verified') {
+          router.replace({
+            pathname: '/verify-email',
+            params: { email: data.email }
+          })
+        } else if (data.message === 'Authentication failed' && data.details === 'User not found') {
+          setMessage('Account not found. Please check your username or create a new account.')
+          setForm({
+            ...form,
+            password: ''
+          })
         } else {
           setMessage(`${data.message}! ${data.details}`)
           setForm({
@@ -68,12 +81,10 @@ const SignIn = () => {
           username: '',
           password: ''
         })
-        const message = 'Internal Server Error. Try again later'
-        if (isWeb) {
-          window.alert(message)
-        } else {
-          Alert.alert(message)
-        }
+        setToast({
+          message: 'Error signing in. Please try again later',
+          type: 'error'
+        })
       })
   }
 
@@ -92,6 +103,13 @@ const SignIn = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <View className='absolute inset-0 bg-black/60' />
+        {toast && (
+          <ToastMessage
+            message={toast.message}
+            type={toast.type}
+            onHide={() => setToast(null)}
+          />
+        )}
         <ScrollView>
           <View className='w-full justify-center min-h-[85vh] px-6 my-6 max-w-[500px] self-center'>
             <View className='bg-black/20 backdrop-blur-sm p-8 rounded-3xl'>

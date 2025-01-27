@@ -22,4 +22,5 @@ ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
 
 CMD uv run flask db upgrade && \
+    uv run flask seed products && \
     uv run gunicorn --bind 0.0.0.0:5000 'app:create_app()'

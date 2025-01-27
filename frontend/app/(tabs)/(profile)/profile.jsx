@@ -1,10 +1,11 @@
 import { router } from 'expo-router'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, ImageBackground, Platform, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, ImageBackground, Platform, ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import CustomButton from '../../../components/CustomButton'
 import IconButton from '../../../components/IconButton'
 import OrderItem from '../../../components/OrderItem'
+import ToastMessage from '../../../components/ToastMessage'
 import { useGlobalContext } from '../../../context/GlobalProvider'
 import { API_URL } from '../../_layout'
 
@@ -27,6 +28,7 @@ const Profile = () => {
     email: '',
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [toast, setToast] = useState(null)
   const { isLoggedIn, setIsLoggedIn, state, setState, refreshViews } = useGlobalContext()
 
   useEffect(() => {
@@ -56,35 +58,23 @@ const Profile = () => {
     .catch(err => {
       console.log(err)
       setIsLoading(false)
-      const message = 'Internal Server Error. Try again later'
-      if (isWeb) {
-        window.alert(message)
-      } else {
-        Alert.alert(message)
-      }
+      setToast({
+        message: 'Error loading profile data',
+        type: 'error'
+      })
     })
   }, [refreshViews])
 
   const handleSignOut = () => {
-    const message = "Are you sure you want to sign out?"
-    if (isWeb) {
-      if (window.confirm(message)) {
-        setIsLoggedIn(false)
-        setState({ token: '' })
-        router.replace('/home')
-      }
-    } else {
-      Alert.alert("Confirm SignOut", message,
-        [
-          { text: "No" },
-          { text: "Yes", onPress: () => {
-            setIsLoggedIn(false)
-            setState({ token: '' })
-            router.replace('/home')
-          }}
-        ]
-      )
-    }
+    setToast({
+      message: 'Signing out...',
+      type: 'success'
+    })
+    setTimeout(() => {
+      setIsLoggedIn(false)
+      setState({ token: '' })
+      router.replace('/home')
+    }, 1000)
   }
 
   return (
@@ -99,6 +89,13 @@ const Profile = () => {
     >
       <SafeAreaView className='h-full'>
         <View className='absolute inset-0 bg-black/60' />
+        {toast && (
+          <ToastMessage
+            message={toast.message}
+            type={toast.type}
+            onHide={() => setToast(null)}
+          />
+        )}
         <ScrollView contentContainerStyle={!isLoggedIn && {height: '100%'}}>
           {isLoggedIn ? (
             <View className='w-full justify-center min-h-[85vh] px-6 my-6 max-w-[800px] self-center'>
@@ -181,7 +178,7 @@ const Profile = () => {
         )}
       </SafeAreaView>
     </ImageBackground>
-  )
-}
+  );
+};
 
-export default Profile
+export default Profile;

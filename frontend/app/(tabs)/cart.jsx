@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ImageBackground, Platform, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, ImageBackground, Platform, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CartItem from '../../components/CartItem';
 import CustomButton from '../../components/CustomButton';
+import ToastMessage from '../../components/ToastMessage';
 import { useGlobalContext } from '../../context/GlobalProvider';
 import { API_URL } from '../_layout';
 
@@ -14,6 +15,7 @@ const Cart = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [total, setTotal] = useState('');
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     setIsLoading(true);
@@ -36,31 +38,22 @@ const Cart = () => {
       })
       .catch(err => {
         console.log(err);
-        const message = 'Internal Server Error. Try again later';
-        if (isWeb) window.alert(message);
-        else Alert.alert(message);
+        setToast({
+          message: 'Error loading cart items',
+          type: 'error'
+        });
       });
 
     setIsLoading(false);
   }, [refreshViews]);
 
-  const handleDelete = (cartId, quantity, showAlert) => {
-    if (showAlert) {
-      const message = "Are you sure you want to remove this product from cart?";
-      if (isWeb) {
-        const confirm = window.confirm(message);
-        if (confirm) deleteItem(cartId, quantity);
-      } else {
-        Alert.alert(
-          "Remove Product",
-          message,
-          [
-            { text: "No", onPress: () => {} },
-            { text: "Yes", onPress: () => deleteItem(cartId, quantity) }
-          ],
-          { cancelable: true }
-        );
-      }
+  const handleDelete = (cartId, quantity, showToast) => {
+    if (showToast) {
+      setToast({
+        message: 'Removing item from cart...',
+        type: 'success'
+      });
+      setTimeout(() => deleteItem(cartId, quantity), 1000);
     } else {
       deleteItem(cartId, quantity);
     }
@@ -75,12 +68,21 @@ const Cart = () => {
         'Authorization': `Bearer ${state.token}`
       },
     }).then(res => res.json())
-      .then(() => triggerRefreshViews())
+      .then(() => {
+        triggerRefreshViews();
+        if (quantity > 1) {
+          setToast({
+            message: 'Items removed from cart',
+            type: 'success'
+          });
+        }
+      })
       .catch(err => {
         console.log(err);
-        const message = 'Internal Server Error. Try again later';
-        if (isWeb) window.alert(message);
-        else Alert.alert(message);
+        setToast({
+          message: 'Could not remove items from cart',
+          type: 'error'
+        });
       })
       .finally(() => setIsLoading(false));
   };
@@ -101,29 +103,20 @@ const Cart = () => {
       .then(() => triggerRefreshViews())
       .catch(err => {
         console.log(err);
-        const message = 'Internal Server Error. Try again later';
-        if (isWeb) window.alert(message);
-        else Alert.alert(message);
+        setToast({
+          message: 'Could not add item to cart',
+          type: 'error'
+        });
       })
       .finally(() => setIsLoading(false));
   };
 
   const handleCheckout = () => {
-    const message = "Are you sure you want to checkout?";
-    if (isWeb) {
-      const confirm = window.confirm(message);
-      if (confirm) processCheckout();
-    } else {
-      Alert.alert(
-        "Confirm Checkout",
-        message,
-        [
-          { text: "No", onPress: () => {} },
-          { text: "Yes", onPress: () => processCheckout() }
-        ],
-        { cancelable: true }
-      );
-    }
+    setToast({
+      message: 'Processing checkout...',
+      type: 'success'
+    });
+    setTimeout(() => processCheckout(), 1000);
   };
 
   const processCheckout = () => {
@@ -137,15 +130,17 @@ const Cart = () => {
     }).then(res => res.json())
       .then(() => {
         triggerRefreshViews();
-        const infoMessage = 'Checkout successful. Check your email for order details or go to Profile';
-        if (isWeb) window.alert(infoMessage);
-        else Alert.alert(infoMessage);
+        setToast({
+          message: 'Checkout successful! Check your email for order details.',
+          type: 'success'
+        });
       })
       .catch(err => {
         console.log(err);
-        const message = 'Internal Server Error. Try again later';
-        if (isWeb) window.alert(message);
-        else Alert.alert(message);
+        setToast({
+          message: 'Could not process checkout',
+          type: 'error'
+        });
       })
       .finally(() => setIsLoading(false));
   };
@@ -162,6 +157,13 @@ const Cart = () => {
     >
       <SafeAreaView className="h-full">
         <View className="absolute inset-0 bg-black/60" />
+        {toast && (
+          <ToastMessage
+            message={toast.message}
+            type={toast.type}
+            onHide={() => setToast(null)}
+          />
+        )}
         <ScrollView>
           <View className="w-full justify-center min-h-[85vh] px-6 my-6 max-w-[800px] self-center">
             <View className="bg-black/20 backdrop-blur-sm p-8 rounded-3xl">
@@ -175,7 +177,6 @@ const Cart = () => {
                 </View>
               ) : (
                 <>
-                  {/* Cart Items */}
                   <View className="space-y-4 mb-8">
                     {products.map(product => (
                       <CartItem
@@ -185,14 +186,13 @@ const Cart = () => {
                         price={product.product.price}
                         quantity={product.quantity}
                         image={product.product.image_url}
-                        handleDelete={(quantity, showAlert) => 
-                          handleDelete(product.id, quantity, showAlert)}
+                        handleDelete={(quantity, showToast) => 
+                          handleDelete(product.id, quantity, showToast)}
                         handleAdd={() => handleAdd(product.product.id)}
                       />
                     ))}
                   </View>
 
-                  {/* Cart Summary */}
                   <View className="bg-white/5 backdrop-blur-sm rounded-2xl p-6">
                     <View className="flex-row justify-between items-center mb-6">
                       <Text className="text-white/60 text-lg">Subtotal</Text>

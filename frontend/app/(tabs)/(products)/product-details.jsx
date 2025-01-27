@@ -1,8 +1,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { Minus, Plus } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, ImageBackground, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, ImageBackground, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ToastMessage from '../../../components/ToastMessage';
 import { useGlobalContext } from '../../../context/GlobalProvider';
 import { API_URL } from '../../_layout';
 
@@ -12,6 +13,7 @@ const ProductDetails = () => {
   const { isLoggedIn, state, triggerRefreshViews } = useGlobalContext();
   const [isLoading, setIsLoading] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [toast, setToast] = useState(null);
   const [productInfo, setProductInfo] = useState({
     name: '',
     price: 0,
@@ -21,6 +23,8 @@ const ProductDetails = () => {
   });
 
   useEffect(() => {
+    if (!productId) return;
+    
     setIsLoading(true);
     fetch(`${API_URL}/products/${productId}`)
       .then(res => res.json())
@@ -34,41 +38,54 @@ const ProductDetails = () => {
         });
       })
       .catch(() => {
-        isWeb ? window.alert('Error loading product') : Alert.alert('Error loading product');
+        setToast({
+          message: 'Error loading product',
+          type: 'error'
+        });
       })
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [productId]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!isLoggedIn) {
-      if (isWeb) {
-        if (window.confirm("Sign in required to add to cart")) router.push('/sign-in');
-        return;
-      }
-      Alert.alert("Sign in required", "", [
-        { text: "Cancel" },
-        { text: "Sign in", onPress: () => router.push('/sign-in') }
-      ]);
+      setToast({
+        message: 'Please sign in to add items to cart',
+        type: 'error'
+      });
+      setTimeout(() => {
+        router.push('/sign-in');
+      }, 1500);
       return;
     }
 
     setIsLoading(true);
-    fetch(`${API_URL}/cart/add`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${state.token}`
-      },
-      body: JSON.stringify({ product_id: productId, quantity })
-    })
-      .then(() => {
-        triggerRefreshViews();
+    try {
+      await fetch(`${API_URL}/cart/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${state.token}`
+        },
+        body: JSON.stringify({ product_id: productId, quantity })
+      });
+      
+      triggerRefreshViews();
+      setToast({
+        message: 'Added to cart',
+        type: 'success'
+      });
+      
+      setTimeout(() => {
         router.push('/cart');
-      })
-      .catch(() => {
-        isWeb ? window.alert('Error adding to cart') : Alert.alert('Error adding to cart');
-      })
-      .finally(() => setIsLoading(false));
+      }, 1500);
+    } catch (err) {
+      setToast({
+        message: 'Could not add to cart',
+        type: 'error'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -83,9 +100,16 @@ const ProductDetails = () => {
     >
       <SafeAreaView className="h-full">
         <View className="absolute inset-0 bg-black/60" />
+        {toast && (
+          <ToastMessage
+            message={toast.message}
+            type={toast.type}
+            onHide={() => setToast(null)}
+          />
+        )}
         <ScrollView>
           <View className="w-full max-w-xl mx-auto p-5">
-            {/* Header with order number and date */}
+            {/* Header with product info */}
             <View className="flex-row justify-between items-center mb-6">
               <View>
                 <Text className="text-2xl text-white font-medium">{productInfo.name}</Text>

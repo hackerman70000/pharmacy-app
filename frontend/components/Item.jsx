@@ -6,7 +6,7 @@ const Item = memo(({ name, price, image, onClick }) => {
 
   return (
     <TouchableOpacity
-      className="bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden w-[160px] md:w-[200px]"
+      className="bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden w-[160px] md:w-[180px] lg:w-[200px]"
       onPress={onClick}
       activeOpacity={0.7}
     >

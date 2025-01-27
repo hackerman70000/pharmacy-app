@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,6 +12,7 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
     TOKEN_SECRET_KEY = os.getenv("TOKEN_SECRET_KEY")
     TOKEN_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
+    FRONTEND_URL = os.getenv("FRONTEND_URL")
 
     MAIL_SERVER = os.getenv("MAIL_SERVER")
     MAIL_PORT = int(os.getenv("MAIL_PORT"))

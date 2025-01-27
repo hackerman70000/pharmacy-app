@@ -41,14 +41,17 @@ const SignUp = () => {
     }).then(res => res.json())
       .then(data => {
         setIsLoading(false)
-        if (data.message == 'Registration successful') {
+        if (data.message === 'Registration successful') {
           setToast({
-            message: 'Account created successfully',
+            message: 'Account created! Please check your email to verify your account',
             type: 'success'
           })
           setTimeout(() => {
-            router.replace(`/sign-in?username=${form.username}`)
-          }, 1500)
+            router.replace({
+              pathname: '/verify-email',
+              params: { email: form.email }
+            })
+          }, 2000)
         } else {
           setMessage(`${data.message}! ${data.details}`)
           setForm({

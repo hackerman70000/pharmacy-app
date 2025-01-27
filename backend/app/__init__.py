@@ -8,11 +8,12 @@ from app.utils import mail
 
 db = SQLAlchemy()
 migrate = Migrate()
+CORS_ORIGIN_WHITELIST = ["http://localhost"]
 
 
 def create_app(config_class=Config):
     app = Flask(__name__, static_url_path="/static", static_folder="static")
-    CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "http://localhost"}})
     app.config.from_object(config_class)
 
     # Initialize database

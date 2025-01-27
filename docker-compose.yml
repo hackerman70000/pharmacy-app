@@ -40,7 +40,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        EXPO_PUBLIC_API_URL: http://localhost:80/api
+        EXPO_PUBLIC_API_URL: ${FRONTEND_URL}/api
     restart: always
     ports:
       - "8081:8081"

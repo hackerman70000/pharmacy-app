@@ -20,7 +20,7 @@ def seed_products():
             description="Paracetamol 650mg is an effective analgesic and antipyretic medication used to relieve mild to moderate pain and reduce fever. It is ideal for conditions such as common cold, flu, headaches, toothaches, menstrual cramps, and muscle pain. Its fast-acting formula ensures quick relief with minimal side effects.",
             price=5.99,
             expiry_date=datetime.now() + timedelta(days=730),
-            image_url="/static/images/products/paracetamol.jpg",
+            image_url="/static/images/products/paracetamol.png",
         ),
         Product(
             name="Ibuprofen 400mg",
@@ -36,7 +36,7 @@ def seed_products():
             description="Amoxicillin 500mg is a broad-spectrum antibiotic used to treat a variety of bacterial infections, including respiratory tract infections, ear infections, urinary tract infections, and skin infections. It works by stopping the growth of bacteria, promoting quick recovery from infections.",
             price=12.99,
             expiry_date=datetime.now() + timedelta(days=365),
-            image_url="/static/images/products/amoxicillin.jpg",
+            image_url="/static/images/products/amoxicillin.png",
         ),
         Product(
             name="Cetirizine Hydrochloride 10mg",
@@ -60,7 +60,7 @@ def seed_products():
             description="Metformin 500mg is a first-line medication for managing type 2 diabetes. It helps regulate blood sugar levels by improving insulin sensitivity and reducing glucose production in the liver. It is an essential part of diabetes management plans, often combined with diet and exercise.",
             price=7.99,
             expiry_date=datetime.now() + timedelta(days=540),
-            image_url="/static/images/products/metformin.jpg",
+            image_url="/static/images/products/metformin.png",
         ),
         Product(
             name="Atorvastatin 20mg",
@@ -164,7 +164,7 @@ def seed_products():
             description="Vitamin D3 1000 IU supports bone health, immune function, and overall wellness by aiding calcium absorption in the body. It is especially beneficial for individuals with limited sun exposure or those at risk of vitamin D deficiency. Ideal for daily supplementation.",
             price=9.99,
             expiry_date=datetime.now() + timedelta(days=1095),
-            image_url="/static/images/products/vitamin-d3.avif",
+            image_url="/static/images/products/vitamin-d3.webp",
         ),
     ]
 

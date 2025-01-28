@@ -1,43 +1,132 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { text-align: center; padding: 20px 0; }
-        .button { 
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        .footer { text-align: center; margin-top: 30px; font-size: 0.9em; color: #666; }
-    </style>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #2d3748;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f7fa;
+}
+
+.container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 32px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.header {
+    text-align: center;
+    padding: 28px 0;
+    border-bottom: 2px solid #10B981;
+    margin-bottom: 32px;
+}
+
+.header h1 {
+    margin: 0;
+    color: #1a202c;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.content {
+    padding: 0 16px;
+}
+
+.button {
+    display: inline-block;
+    padding: 12px 32px;
+    background-color: #10B981;
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    margin: 24px 0;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.button:hover {
+    background-color: #059669;
+}
+
+.verification-link {
+    background-color: #f0fff4;
+    padding: 16px;
+    border-radius: 12px;
+    word-break: break-all;
+    font-family: monospace;
+    font-size: 14px;
+    color: #10B981;
+}
+
+.security-notice {
+    margin-top: 24px;
+    padding: 12px;
+    background-color: #ecfdf5;
+    border-radius: 12px;
+    color: #065f46;
+    font-size: 14px;
+}
+
+.footer {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
+    font-size: 14px;
+    color: #718096;
+}
+
+.contact-support {
+    margin-top: 16px;
+    font-size: 14px;
+    color: #4a5568;
+}
+
+.contact-support a {
+    color: #10B981;
+    text-decoration: none;
+}
+
+.contact-support a:hover {
+    text-decoration: underline;
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Verify Your Email</h1>
-        </div>
-
+<div class="container">
+    <div class="header">
+        <h1>Verify your email</h1>
+    </div>
+    <div class="content">
         <p>Hello {{ username }},</p>
-        <p>Thank you for registering. Please click the button below to verify your email address:</p>
+        <p>Thank you for creating an account at Your Pharmacy. To ensure the security of your information, please verify your email address by clicking the button below:</p>
         
         <div style="text-align: center;">
             <a href="{{ verification_url }}" class="button">Verify Email</a>
         </div>
 
-        <p>Or copy and paste this link in your browser:</p>
-        <p>{{ verification_url }}</p>
+        <p>Alternatively, you can copy this verification link:</p>
+        <div class="verification-link">{{ verification_url }}</div>
 
-        <p>This link will expire in 24 hours.</p>
+        <div class="security-notice">
+            For your security, this verification link will expire in 24 hours.
+        </div>
+
+        <div class="contact-support">
+            Need help? Contact our support team at <a href="mailto:pharmacy.app.wut@gmail.com">pharmacy.app.wut@gmail.com</a>
+        </div>
 
         <div class="footer">
-            <p>If you didn't create an account, please ignore this email.</p>
+            <p>If you didn't create an account with our pharmacy, please ignore this email.</p>
         </div>
     </div>
+</div>
 </body>
 </html>

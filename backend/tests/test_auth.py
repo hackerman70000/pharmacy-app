@@ -1,22 +1,27 @@
-import pytest
+from unittest.mock import patch
+
 from flask import json
 
 
 def test_register_success(client):
     """Test successful user registration."""
-    response = client.post(
-        "/api/auth/register",
-        json={
-            "username": "newuser",
-            "email": "newuser@example.com",
-            "password": "TestPass123!",
-        },
-    )
-    assert response.status_code == 201
-    data = json.loads(response.data)
-    assert "user" in data
-    assert data["user"]["username"] == "newuser"
-    assert data["user"]["email"] == "newuser@example.com"
+    with patch("app.routes.auth.send_verification_email") as mock_email:
+        mock_email.return_value = True
+
+        response = client.post(
+            "/api/auth/register",
+            json={
+                "username": "newuser",
+                "email": "newuser@example.com",
+                "password": "TestPass123!",
+            },
+        )
+        assert response.status_code == 201
+        data = json.loads(response.data)
+        assert "user" in data
+        assert data["user"]["username"] == "newuser"
+        assert data["user"]["email"] == "newuser@example.com"
+        assert not data["user"]["email_verified"]
 
 
 def test_register_duplicate_username(client, test_user):
@@ -70,7 +75,7 @@ def test_login_success(client, test_user):
         "/api/auth/login",
         json={
             "username": test_user.username,
-            "password": "Test123!",  # Must match the password set in test_user fixture
+            "password": "Test123!",
         },
     )
     assert response.status_code == 200

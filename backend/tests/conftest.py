@@ -1,11 +1,12 @@
 import os
 import uuid
-import pytest
 from datetime import datetime, timedelta
+
+import pytest
+from app import create_app, db
+from app.models import Cart, Product, User
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import scoped_session, sessionmaker
-from app import create_app, db
-from app.models import User, Product, Cart, Order
 from werkzeug.security import generate_password_hash
 
 
@@ -40,11 +41,15 @@ def _create_test_db():
 
 class TestConfig:
     """Test configuration."""
+
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = f"postgresql://postgres:postgres@{get_database_host()}:5432/pharmacy_test_db"
+    SQLALCHEMY_DATABASE_URI = (
+        f"postgresql://postgres:postgres@{get_database_host()}:5432/pharmacy_test_db"
+    )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = "test_secret_key"
     TOKEN_SECRET_KEY = "test_token_secret_key" * 2
+    FRONTEND_URL = "http://localhost:8081"
     MAIL_SERVER = "localhost"
     MAIL_PORT = 25
     MAIL_USE_TLS = False
@@ -107,7 +112,10 @@ def test_user(db_session):
     email = f"test_{unique_id[:8]}@example.com"
 
     user = User(
-        username=username, email=email, password=generate_password_hash("Test123!")
+        username=username,
+        email=email,
+        password=generate_password_hash("Test123!"),
+        email_verified=True,
     )
     db_session.add(user)
     db_session.commit()

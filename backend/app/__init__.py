@@ -13,7 +13,12 @@ CORS_ORIGIN_WHITELIST = ["http://localhost"]
 
 def create_app(config_class=Config):
     app = Flask(__name__, static_url_path="/static", static_folder="static")
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost"}})
+    CORS(
+        app,
+        resources={
+            r"/api/*": {"origins": ["http://localhost:3000", "http://localhost:8081"]}
+        },
+    )
     app.config.from_object(config_class)
 
     # Initialize database
